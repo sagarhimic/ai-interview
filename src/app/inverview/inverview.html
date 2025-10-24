@@ -1,35 +1,37 @@
 <div class="container">
-<h2>AI Technical Interview</h2>
+<h2>AI Technical Interview {{ user_info?.data?.job_title }}</h2>
  <button class="logout-btn" (click)="logout()">Logout</button>
   <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
-<div>
+<div class="hidden-section">
+    <div>
 <label>Job Title</label>
-<input formControlName="job_title" />
-</div>
+<input type="hidden" formControlName="job_title" />
+    </div>
  
     <div>
 <label>Job Description</label>
-<input formControlName="job_description" />
-</div>
+<input  type="hidden" formControlName="job_description" />
+    </div>
  
     <div>
 <label>Duration (questions)</label>
-<input type="number" formControlName="duration" />
-</div>
+<input  type="hidden" formControlName="duration" />
+    </div>
  
     <div>
 <label>Experience (years)</label>
-<input type="number" formControlName="experience" />
-</div>
+<input  type="hidden" formControlName="experience" />
+    </div>
  
     <div>
 <label>Required Skills (comma separated)</label>
-<input formControlName="required_skills" />
-</div>
+<input  type="hidden" formControlName="required_skills" />
+    </div>
  
     <div>
 <label>Candidate Skills (comma separated)</label>
-<input formControlName="candidate_skills" />
+<input  type="hidden" formControlName="candidate_skills" />
+    </div>
 </div>
  
     <div style="margin-top:8px;">

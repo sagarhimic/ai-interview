@@ -18,6 +18,7 @@ export class Login {
     loading = false;
     errorMessage = '';
     form  : any;
+    user_info : any;
 
     constructor(private fb: FormBuilder,
        private http: HttpClient,
@@ -42,6 +43,7 @@ export class Login {
     this.auth.authentication(formData).subscribe({
       next: (res) => {
         this._token.setToken(res.access_token);
+        this._token.setUserData(JSON.stringify(res));
         alert('Login successful!');
         this.router.navigate(['/interview']); // or any route
       },
@@ -50,5 +52,14 @@ export class Login {
         this.loading = false;
       },
     });
+  }
+
+  GetUserInfo() {
+    
+    this.loading = true;
+    
+    const user_info = this._token.getUserData;
+    
+    console.log(user_info);
   }
 }

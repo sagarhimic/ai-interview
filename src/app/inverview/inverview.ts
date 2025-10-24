@@ -25,6 +25,7 @@ export class Inverview implements OnInit {
   // candidate placeholder
   // candidateId = Math.floor(Math.random() * 100000) + 1;
   candidateId = 5;
+  user_info: any;
  
   loadingGenerate = false;
   loadingSubmit = false;
@@ -33,17 +34,19 @@ export class Inverview implements OnInit {
     private fb: FormBuilder,
     private svc: Interviews,
     private ngZone: NgZone,
-    private auth: Token
+    private _token: Token
   ) {}
  
   ngOnInit(): void {
+    const user_info = this._token.getUserData();
+    // console.log(user_info?.data?.experience);
     this.setupForm = this.fb.group({
-      job_title: ['Python Developer/JPMC Tampa FL'],
-      job_description: ['Python Developer/JPMC Tampa FL — backend role'],
-      duration: [5, [Validators.required]],
-      experience: [5, [Validators.required]],
-      required_skills: ['Python, Flask, FastAPI, SQL, PyTest', [Validators.required]],
-      candidate_skills: ['Python, HTML, CSS, PHP, MySQL', [Validators.required]]
+      job_title: [user_info?.data?.job_title],
+      job_description: [user_info?.data?.job_description],
+      duration: [user_info?.data?.duration, [Validators.required]],
+      experience: [user_info?.data?.experience, [Validators.required]],
+      required_skills: [user_info?.data?.required_skills, [Validators.required]],
+      candidate_skills: [user_info?.data?.candidate_skills, [Validators.required]]
     });
  
     const Speech = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -173,7 +176,7 @@ export class Inverview implements OnInit {
   }
 
   logout() {
-    this.auth.logout();
+    this._token.logout();
   }
 
 }

@@ -24,5 +24,10 @@ export class Auth {
     return this.http.post(`${this.base}/login/`,data, httpOptions);
   }
 
+  getUser(candidate_id : any): Observable<any> {
+    httpOptions.params = {};
+    return this.http.post(`${this.base}/candidate/{candidate_id}`, httpOptions);
+  }
+
   
 }
