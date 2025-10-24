@@ -1,0 +1,33 @@
+<div class="login-container">
+  <h2>Login</h2>
+  <form [formGroup]="form" (ngSubmit)="login()">
+    <div>
+      <label>Meeting ID</label>
+      <input formControlName="meeting_id" placeholder="Enter Meeting ID" />
+    </div>
+
+    <div>
+      <label>Password</label>
+      <input type="password" formControlName="password" placeholder="Enter Password" />
+    </div>
+
+    <button type="submit" [disabled]="loading">Login</button>
+
+    <p *ngIf="errorMessage" style="color:red">{{ errorMessage }}</p>
+  </form>
+</div>
+
+<style>
+.login-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+input, button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+}
+</style>

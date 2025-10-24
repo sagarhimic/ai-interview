@@ -1,0 +1,67 @@
+<div class="container">
+<h2>AI Technical Interview</h2>
+ <button class="logout-btn" (click)="logout()">Logout</button>
+  <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
+<div>
+<label>Job Title</label>
+<input formControlName="job_title" />
+</div>
+ 
+    <div>
+<label>Job Description</label>
+<input formControlName="job_description" />
+</div>
+ 
+    <div>
+<label>Duration (questions)</label>
+<input type="number" formControlName="duration" />
+</div>
+ 
+    <div>
+<label>Experience (years)</label>
+<input type="number" formControlName="experience" />
+</div>
+ 
+    <div>
+<label>Required Skills (comma separated)</label>
+<input formControlName="required_skills" />
+</div>
+ 
+    <div>
+<label>Candidate Skills (comma separated)</label>
+<input formControlName="candidate_skills" />
+</div>
+ 
+    <div style="margin-top:8px;">
+<button type="submit" [disabled]="loadingGenerate">Generate Questions</button>
+<span *ngIf="loadingGenerate">Generating...</span>
+</div>
+</form>
+ 
+  <hr />
+ 
+  <div *ngIf="questions.length">
+<h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
+<p class="question">{{ questions[currentIndex]?.question }}</p>
+ 
+    <textarea #typedAnswer placeholder="Type your answer here..."></textarea>
+ 
+    <div class="voice">
+<button (click)="startRecording()" [disabled]="recording">🎤 Start Speaking</button>
+<button (click)="stopRecording()" [disabled]="!recording">🛑 Stop</button>
+<div *ngIf="interimTranscript">Interim: {{interimTranscript}}</div>
+<div *ngIf="finalTranscript">Final: {{finalTranscript}}</div>
+</div>
+ 
+    <div style="margin-top:8px;">
+<button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit">Submit Typed</button>
+<button (click)="submitAnswer()" [disabled]="loadingSubmit">Submit Spoken</button>
+<span *ngIf="loadingSubmit">Submitting...</span>
+</div>
+ 
+    <div style="margin-top:8px;">
+<button (click)="prev()">Prev</button>
+<button (click)="next()">Next</button>
+</div>
+</div>
+</div>
