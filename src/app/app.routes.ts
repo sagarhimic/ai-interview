@@ -6,6 +6,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
 
     {   path: '', component: Login },
+    
     {
         path: 'interview',component: Inverview,
         canActivate: [authGuard] // ✅ Protect Dashboard

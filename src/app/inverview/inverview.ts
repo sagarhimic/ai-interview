@@ -1,182 +1,255 @@
-import { Component, NgZone, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Interviews } from '../core/_services/Interviews';
+import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Interviews } from '../core/_services/Interviews';
 import { Token } from '../core/_services/token';
 
 @Component({
   selector: 'app-inverview',
+  standalone: true,
   imports: [FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './inverview.html',
   styleUrl: './inverview.scss',
 })
 export class Inverview implements OnInit {
+  @ViewChild('video') videoElement!: ElementRef<HTMLVideoElement>;
 
   setupForm!: FormGroup;
-  questions: { id: number, question: string }[] = [];
+  questions: { id: number; question: string }[] = [];
   currentIndex = 0;
- 
-  // speech recognition
-  recognition: any = null;
+
+  loadingGenerate = false;
+  loadingSubmit = false;
+
+  candidateId = 5;
+  user_info: any;
+
+  // Camera + voice vars
+  stream: MediaStream | null = null;
+  frameInterval: any = null;
+  recognition: any;
   recording = false;
   interimTranscript = '';
   finalTranscript = '';
- 
-  // candidate placeholder
-  // candidateId = Math.floor(Math.random() * 100000) + 1;
-  candidateId = 5;
-  user_info: any;
- 
-  loadingGenerate = false;
-  loadingSubmit = false;
- 
+
   constructor(
     private fb: FormBuilder,
     private svc: Interviews,
     private ngZone: NgZone,
     private _token: Token
   ) {}
- 
+
   ngOnInit(): void {
-    const user_info = this._token.getUserData();
-    // console.log(user_info?.data?.experience);
+    this.user_info = this._token.getUserData();
     this.setupForm = this.fb.group({
-      job_title: [user_info?.data?.job_title],
-      job_description: [user_info?.data?.job_description],
-      duration: [user_info?.data?.duration, [Validators.required]],
-      experience: [user_info?.data?.experience, [Validators.required]],
-      required_skills: [user_info?.data?.required_skills, [Validators.required]],
-      candidate_skills: [user_info?.data?.candidate_skills, [Validators.required]]
+      job_title: [this.user_info?.data?.job_title],
+      job_description: [this.user_info?.data?.job_description],
+      duration: [this.user_info?.data?.duration, [Validators.required]],
+      experience: [this.user_info?.data?.experience, [Validators.required]],
+      required_skills: [this.user_info?.data?.required_skills, [Validators.required]],
+      candidate_skills: [this.user_info?.data?.candidate_skills, [Validators.required]],
     });
- 
-    const Speech = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (Speech) {
-      this.recognition = new Speech();
-      this.recognition.lang = 'en-US';
-      this.recognition.interimResults = true;
-      this.recognition.onresult = (event: any) => {
-        this.ngZone.run(() => {
-          let interim = '';
-          let final = '';
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            const res = event.results[i];
-            if (res.isFinal) final += res[0].transcript;
-            else interim += res[0].transcript;
-          }
-          this.interimTranscript = interim;
-          if (final) {
-            // append final into finalTranscript
-            this.finalTranscript = (this.finalTranscript ? this.finalTranscript + ' ' : '') + final;
-          }
-        });
+  }
+
+  // ✅ Generate questions & start camera + voice
+  generateQuestions() {
+    if (this.setupForm.invalid) return;
+    this.loadingGenerate = true;
+
+    const formData = new FormData();
+    const payload = this.setupForm.value;
+    Object.keys(payload).forEach((k) => formData.append(k, payload[k]));
+
+    this.svc.generateQuestions(formData).subscribe({
+      next: async (res: any) => {
+        this.loadingGenerate = false;
+        this.questions = Array.isArray(res.questions) ? res.questions : [];
+        this.currentIndex = 0;
+
+        // ✅ Start camera only when questions loaded
+        await this.startCamera();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loadingGenerate = false;
+        alert('Error generating questions.');
+      },
+    });
+  }
+
+  // ✅ Start webcam and wait till ready
+  async startCamera() {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const video = this.videoElement.nativeElement;
+      video.srcObject = this.stream;
+
+      // Wait for camera readiness
+      video.onloadedmetadata = () => video.play();
+      video.onplaying = () => {
+        console.log('✅ Video feed ready, starting frame streaming...');
+        setTimeout(() => this.startFrameStreaming(), 1200);
+        this.startAutoListening();
       };
-      this.recognition.onend = () => {
-        this.ngZone.run(() => this.recording = false);
-      };
-      this.recognition.onerror = (err: any) => {
-        console.error('STT error', err);
-        this.ngZone.run(() => this.recording = false);
-      };
+      console.log('🎥 Camera started');
+    } catch (err) {
+      console.error('Camera error:', err);
+      alert('Please allow camera & microphone access.');
     }
   }
- 
-  generateQuestions() {
-  if (this.setupForm.invalid) return;
-  this.loadingGenerate = true;
-  this.questions = [];
 
-  const formData = new FormData();
-  const payload = this.setupForm.value;
-  formData.append('job_title', payload.job_title);
-  formData.append('job_description', payload.job_description);
-  formData.append('duration', String(payload.duration));
-  formData.append('experience', String(payload.experience));
-  formData.append('required_skills', payload.required_skills);
-  formData.append('candidate_skills', payload.candidate_skills);
+  // ✅ Start streaming frames to backend every second
+  startFrameStreaming() {
+    if (!this.videoElement?.nativeElement) return;
+    const video = this.videoElement.nativeElement;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    canvas.width = 320;
+    canvas.height = 240;
 
-  this.svc.generateQuestions(formData).subscribe({
-    next: (res: any) => {
-      this.loadingGenerate = false;
-      this.questions = Array.isArray(res.questions) ? res.questions : [];
-      this.currentIndex = 0;
-    },
-    error: (err) => {
-      console.error(err);
-      this.loadingGenerate = false;
-      alert('Error generating questions. Check backend logs.');
-    }
-  });
-}
+    let frameCount = 0;
 
- 
-  startRecording() {
-    if (!this.recognition) {
-      alert('SpeechRecognition not supported in this browser (use Chrome).');
+    this.frameInterval = setInterval(async () => {
+      try {
+        frameCount++;
+        if (frameCount < 5) return; // ignore first few blank frames
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/jpeg'));
+        const formData = new FormData();
+        formData.append('candidate_id', String(this.candidateId));
+        formData.append('frame', blob);
+
+        this.svc.dataFrameSet(formData).subscribe({
+          next: (result: any) => {
+            if (!result) return;
+
+            if (result.message === 'No face detected') {
+              console.log('⚠️ Waiting for face...');
+              return;
+            }
+
+            if (result.alert && result.message === 'Proxy detected') {
+              console.warn('🚨 Proxy Detected:', result.message);
+              this.stopCamera();
+              alert('Proxy Detected! Please ensure only the registered candidate is visible.');
+            } else {
+              console.log(`🧠 Expression: ${result.expression} | Lip Sync: ${result.lip_sync}`);
+            }
+          },
+          error: (err) => console.error('Frame analysis API error:', err),
+        });
+      } catch (err) {
+        console.error('Frame capture error:', err);
+      }
+    }, 1000);
+  }
+
+  stopFrameStreaming() {
+    if (this.frameInterval) clearInterval(this.frameInterval);
+  }
+
+  // ✅ Voice listening logic
+  startAutoListening() {
+    const Speech = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!Speech) {
+      alert('Speech recognition not supported in this browser.');
       return;
     }
+
+    this.recognition = new Speech();
+    this.recognition.lang = 'en-US';
+    this.recognition.interimResults = true;
+    this.recognition.continuous = false;
+
     this.finalTranscript = '';
     this.interimTranscript = '';
     this.recording = true;
+
+    this.recognition.onresult = (event: any) => {
+      this.ngZone.run(() => {
+        let final = '';
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const result = event.results[i];
+          if (result.isFinal) final += result[0].transcript;
+          else interim += result[0].transcript;
+        }
+        this.interimTranscript = interim;
+        if (final) this.finalTranscript += (this.finalTranscript ? ' ' : '') + final;
+      });
+    };
+
+    this.recognition.onend = () => {
+      this.ngZone.run(() => {
+        this.recording = false;
+        if (this.finalTranscript.trim().length > 3) {
+          this.submitAnswer(this.finalTranscript);
+        } else {
+          console.log('🕓 No voice input — restarting...');
+          setTimeout(() => this.startAutoListening(), 2000);
+        }
+      });
+    };
+
+    this.recognition.onerror = (err: any) => {
+      console.error('Speech recognition error:', err);
+      this.recording = false;
+    };
+
     this.recognition.start();
+    console.log('🎤 Listening started');
   }
- 
-  stopRecording() {
-    if (!this.recognition) return;
-    this.recognition.stop(); // onend will set recording false
+
+  submitAnswer(answerText: string) {
+    if (!this.questions.length) return;
+    const q = this.questions[this.currentIndex];
+    if (!answerText.trim()) return;
+
+    const formData = new FormData();
+    formData.append('candidate_id', String(this.candidateId));
+    formData.append('question_id', String(q.id));
+    formData.append('answer_text', answerText);
+    formData.append('candidate_skills', this.setupForm.value.candidate_skills);
+    formData.append('experience', String(this.setupForm.value.experience));
+    formData.append('job_description', this.setupForm.value.job_description);
+    formData.append('required_skills', this.setupForm.value.required_skills);
+
+    this.loadingSubmit = true;
+    this.svc.submitAnswer(formData).subscribe({
+      next: (res: any) => {
+        this.loadingSubmit = false;
+        console.log(`✅ Answer submitted. Score: ${res?.accuracy_score ?? res?.accuracy}`);
+
+        this.finalTranscript = '';
+        this.interimTranscript = '';
+
+        if (this.currentIndex < this.questions.length - 1) {
+          this.currentIndex++;
+          setTimeout(() => this.startAutoListening(), 1500);
+        } else {
+          this.stopCamera();
+          alert('🎉 Interview completed successfully!');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.loadingSubmit = false;
+        alert('Error submitting answer.');
+      },
+    });
   }
- 
-  submitAnswer(typedValue?: string) {
-  if (this.questions.length === 0) return alert('No questions generated');
 
-  const q = this.questions[this.currentIndex];
-  const answerText =
-    (typedValue && typedValue.trim()) ||
-    this.finalTranscript ||
-    this.interimTranscript ||
-    '';
-
-  if (!answerText) return alert('Answer is empty. Type or speak an answer.');
-
-  // ✅ Convert payload to FormData
-  const formData = new FormData();
-  formData.append('candidate_id', String(this.candidateId));
-  formData.append('question_id', String(q.id));
-  formData.append('answer_text', answerText);
-  formData.append('candidate_skills', this.setupForm.value.candidate_skills);
-  formData.append('experience', String(this.setupForm.value.experience));
-  formData.append('job_description', this.setupForm.value.job_description);
-  formData.append('required_skills', this.setupForm.value.required_skills);
-
-  this.loadingSubmit = true;
-  this.svc.submitAnswer(formData).subscribe({
-    next: (res: any) => {
-      this.loadingSubmit = false;
-      const score = res?.accuracy_score ?? res?.accuracy ?? null;
-      alert(`Score received: ${score}`);
-
-      // clear transcripts and move to next question
-      this.finalTranscript = '';
-      this.interimTranscript = '';
-      if (this.currentIndex < this.questions.length - 1) this.currentIndex++;
-    },
-    error: (err) => {
-      console.error(err);
-      this.loadingSubmit = false;
-      alert('Error submitting answer. Check backend logs.');
+  stopCamera() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((t) => t.stop());
+      this.stream = null;
+      console.log('🎥 Camera stopped');
     }
-  });
-}
-
- 
-  next() {
-    if (this.currentIndex < this.questions.length - 1) this.currentIndex++;
-  }
-  prev() {
-    if (this.currentIndex > 0) this.currentIndex--;
+    this.stopFrameStreaming();
   }
 
   logout() {
     this._token.logout();
   }
-
 }

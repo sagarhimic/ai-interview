@@ -27,4 +27,9 @@ export class Interviews {
     httpOptions.params = {};
     return this.http.post(`${this.base}/submit_answer/`,data, httpOptions);
   }
+
+  dataFrameSet(data : any): Observable<any> {
+    httpOptions.params = {};
+    return this.http.post(`${this.base}/analyze_frame/`,data, httpOptions);
+  }
 }
