@@ -20,17 +20,23 @@ export class Inverview implements OnInit {
 
   loadingGenerate = false;
   loadingSubmit = false;
-
   candidateId = 5;
   user_info: any;
 
-  // Camera + voice vars
+  // Camera + voice
   stream: MediaStream | null = null;
   frameInterval: any = null;
-  recognition: any;
+  recognition: any = null;
   recording = false;
   interimTranscript = '';
   finalTranscript = '';
+  silenceTimeout: any = null;
+  readonly maxSilenceDuration = 40000; // 40 sec inactivity
+
+  // Flags updated from backend
+  lastFaceDetected = true;
+  lastLipMoving = false;
+  proxyDetected = false;
 
   constructor(
     private fb: FormBuilder,
@@ -45,60 +51,121 @@ export class Inverview implements OnInit {
       job_title: [this.user_info?.data?.job_title],
       job_description: [this.user_info?.data?.job_description],
       duration: [this.user_info?.data?.duration, [Validators.required]],
-      experience: [this.user_info?.data?.experience, [Validators.required]],
+      experience: [
+        this.extractNumericValue(this.user_info?.data?.experience),
+        [Validators.required],
+      ],
       required_skills: [this.user_info?.data?.required_skills, [Validators.required]],
       candidate_skills: [this.user_info?.data?.candidate_skills, [Validators.required]],
     });
   }
 
-  // ✅ Generate questions & start camera + voice
+  // -----------------------
+  // Start Interview
+  // -----------------------
   generateQuestions() {
-    if (this.setupForm.invalid) return;
-    this.loadingGenerate = true;
+     console.log('🚀 generateQuestions called');
+      if (this.setupForm.invalid) return;
+       this.loadingGenerate = true;
+        const formData = new FormData();
+         const payload = this.setupForm.value;
+          Object.keys(payload).forEach((k) => formData.append(k, payload[k]));
+           this.svc.generateQuestions(formData).subscribe({
+             next: async (res: any) => { 
+              this.loadingGenerate = false;
+              this.questions = Array.isArray(res.questions) ? res.questions : []; this.currentIndex = 0;
+               // Start camera and then ask first question 
+               await this.startCamera();
+               if (this.questions.length > 0) {
+                 this.askAndListen(this.questions[this.currentIndex].question);
+                 } 
+                }, error: (err) => {
+                   console.error(err);
+                   this.loadingGenerate = false; 
+                   alert('Error generating questions.'); 
+                  }, 
+                }); 
+              }
+  // -----------------------
+  // Speak → Listen
+  // -----------------------
+  async askAndListen(questionText: string) {
+  await this.speakQuestion(questionText);
+  setTimeout(() => this.startAutoListening(), 1500);
+}
 
-    const formData = new FormData();
-    const payload = this.setupForm.value;
-    Object.keys(payload).forEach((k) => formData.append(k, payload[k]));
 
-    this.svc.generateQuestions(formData).subscribe({
-      next: async (res: any) => {
-        this.loadingGenerate = false;
-        this.questions = Array.isArray(res.questions) ? res.questions : [];
-        this.currentIndex = 0;
+  // Speak Question TTS
+  async speakQuestion(text: string): Promise<void> {
+  if (!('speechSynthesis' in window)) return Promise.resolve();
 
-        // ✅ Start camera only when questions loaded
-        await this.startCamera();
-      },
-      error: (err) => {
-        console.error(err);
-        this.loadingGenerate = false;
-        alert('Error generating questions.');
-      },
-    });
-  }
-
-  // ✅ Start webcam and wait till ready
-  async startCamera() {
+  // 🔇 Stop mic recognition before speaking (to prevent echo)
+  if (this.recognition && this.recording) {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      const video = this.videoElement.nativeElement;
-      video.srcObject = this.stream;
-
-      // Wait for camera readiness
-      video.onloadedmetadata = () => video.play();
-      video.onplaying = () => {
-        console.log('✅ Video feed ready, starting frame streaming...');
-        setTimeout(() => this.startFrameStreaming(), 1200);
-        this.startAutoListening();
-      };
-      console.log('🎥 Camera started');
-    } catch (err) {
-      console.error('Camera error:', err);
-      alert('Please allow camera & microphone access.');
-    }
+      this.recognition.abort();
+    } catch (e) {}
+    this.recording = false;
   }
 
-  // ✅ Start streaming frames to backend every second
+  // 🔇 Mute mic input (browser level)
+  if (this.stream) {
+    this.stream.getAudioTracks().forEach((track) => (track.enabled = false));
+  }
+
+  window.speechSynthesis.cancel();
+
+  return new Promise<void>((resolve) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    utterance.onstart = () => {
+      console.log('🗣 Speaking question...');
+    };
+
+    utterance.onend = () => {
+      console.log('✅ Finished speaking question');
+      // 🎙 Re-enable mic after system voice ends
+      if (this.stream) {
+        this.stream.getAudioTracks().forEach((track) => (track.enabled = true));
+      }
+      resolve();
+    };
+
+    setTimeout(() => window.speechSynthesis.speak(utterance), 200);
+  });
+}
+
+  // -----------------------
+  // Camera & Frame Streaming
+  // -----------------------
+  async startCamera() {
+  try {
+    // Enable audio with echo/noise cancellation
+    this.stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 44100
+      }
+    });
+
+    const video = this.videoElement.nativeElement;
+    video.srcObject = this.stream;
+    await video.play();
+
+    console.log('🎥 Camera started with echo suppression');
+    setTimeout(() => this.startFrameStreaming(), 1200);
+  } catch (err) {
+    console.error('Camera error:', err);
+    alert('Please allow camera & microphone access.');
+  }
+}
+
+
   startFrameStreaming() {
     if (!this.videoElement?.nativeElement) return;
     const video = this.videoElement.nativeElement;
@@ -107,15 +174,11 @@ export class Inverview implements OnInit {
     canvas.width = 320;
     canvas.height = 240;
 
-    let frameCount = 0;
-
     this.frameInterval = setInterval(async () => {
       try {
-        frameCount++;
-        if (frameCount < 5) return; // ignore first few blank frames
-
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/jpeg'));
+        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.7));
+
         const formData = new FormData();
         formData.append('candidate_id', String(this.candidateId));
         formData.append('frame', blob);
@@ -124,20 +187,20 @@ export class Inverview implements OnInit {
           next: (result: any) => {
             if (!result) return;
 
-            if (result.message === 'No face detected') {
-              console.log('⚠️ Waiting for face...');
-              return;
-            }
+            this.lastFaceDetected = result.message !== 'No face detected';
+            this.lastLipMoving = !!result.lip_sync;
+            this.proxyDetected = !!result.alert;
 
-            if (result.alert && result.message === 'Proxy detected') {
-              console.warn('🚨 Proxy Detected:', result.message);
+            console.log(
+              `🧠 Face: ${this.lastFaceDetected} | Lip: ${this.lastLipMoving} | Expr: ${result.expression || 'N/A'}`
+            );
+
+            if (this.proxyDetected) {
               this.stopCamera();
-              alert('Proxy Detected! Please ensure only the registered candidate is visible.');
-            } else {
-              console.log(`🧠 Expression: ${result.expression} | Lip Sync: ${result.lip_sync}`);
+              alert('🚨 Proxy Detected! Interview paused.');
             }
           },
-          error: (err) => console.error('Frame analysis API error:', err),
+          error: (err) => console.error('Frame analysis error:', err),
         });
       } catch (err) {
         console.error('Frame capture error:', err);
@@ -145,26 +208,28 @@ export class Inverview implements OnInit {
     }, 1000);
   }
 
-  stopFrameStreaming() {
-    if (this.frameInterval) clearInterval(this.frameInterval);
-  }
-
-  // ✅ Voice listening logic
+  // -----------------------
+  // Voice Recognition + Inactivity Check
+  // -----------------------
   startAutoListening() {
     const Speech = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (!Speech) {
-      alert('Speech recognition not supported in this browser.');
-      return;
-    }
+    if (!Speech) return alert('Speech recognition not supported.');
+
+    if (this.recording) return;
 
     this.recognition = new Speech();
     this.recognition.lang = 'en-US';
     this.recognition.interimResults = true;
-    this.recognition.continuous = false;
+    this.recognition.continuous = true;
 
     this.finalTranscript = '';
     this.interimTranscript = '';
     this.recording = true;
+
+    const resetSilenceTimer = () => {
+      clearTimeout(this.silenceTimeout);
+      this.silenceTimeout = setTimeout(() => this.handleSilenceTimeout(), this.maxSilenceDuration);
+    };
 
     this.recognition.onresult = (event: any) => {
       this.ngZone.run(() => {
@@ -177,30 +242,51 @@ export class Inverview implements OnInit {
         }
         this.interimTranscript = interim;
         if (final) this.finalTranscript += (this.finalTranscript ? ' ' : '') + final;
-      });
-    };
-
-    this.recognition.onend = () => {
-      this.ngZone.run(() => {
-        this.recording = false;
-        if (this.finalTranscript.trim().length > 3) {
-          this.submitAnswer(this.finalTranscript);
-        } else {
-          console.log('🕓 No voice input — restarting...');
-          setTimeout(() => this.startAutoListening(), 2000);
-        }
+        resetSilenceTimer();
       });
     };
 
     this.recognition.onerror = (err: any) => {
-      console.error('Speech recognition error:', err);
+      console.warn('Speech recognition error:', err);
       this.recording = false;
+      setTimeout(() => this.startAutoListening(), 1000);
     };
 
-    this.recognition.start();
-    console.log('🎤 Listening started');
+    this.recognition.onend = () => {
+      this.recording = false;
+      if (this.finalTranscript.trim().length > 2) {
+        this.submitAnswer(this.finalTranscript);
+      } else {
+        console.log('Restarting listening...');
+        setTimeout(() => this.startAutoListening(), 1500);
+      }
+    };
+
+    try {
+      this.recognition.start();
+      resetSilenceTimer();
+      console.log('🎤 Listening with 40s timeout');
+    } catch (e) {
+      console.error('Recognition start error:', e);
+    }
   }
 
+  handleSilenceTimeout() {
+    console.warn('⏰ Silence timeout — verifying activity...');
+    if (this.lastFaceDetected || this.lastLipMoving) {
+      console.log('👀 Candidate still active — extending timeout by 15s');
+      this.silenceTimeout = setTimeout(() => this.handleSilenceTimeout(), 10000);
+      return;
+    }
+
+    console.log('😶 No activity — auto submitting answer');
+    this.recognition.stop();
+    this.submitAnswer(this.finalTranscript || 'No response detected');
+  }
+
+  // -----------------------
+  // Submit Answer
+  // -----------------------
   submitAnswer(answerText: string) {
     if (!this.questions.length) return;
     const q = this.questions[this.currentIndex];
@@ -209,7 +295,7 @@ export class Inverview implements OnInit {
     const formData = new FormData();
     formData.append('candidate_id', String(this.candidateId));
     formData.append('question_id', String(q.id));
-    formData.append('answer_text', answerText);
+    formData.append('answer_text', answerText.trim());
     formData.append('candidate_skills', this.setupForm.value.candidate_skills);
     formData.append('experience', String(this.setupForm.value.experience));
     formData.append('job_description', this.setupForm.value.job_description);
@@ -220,13 +306,12 @@ export class Inverview implements OnInit {
       next: (res: any) => {
         this.loadingSubmit = false;
         console.log(`✅ Answer submitted. Score: ${res?.accuracy_score ?? res?.accuracy}`);
-
         this.finalTranscript = '';
         this.interimTranscript = '';
 
         if (this.currentIndex < this.questions.length - 1) {
           this.currentIndex++;
-          setTimeout(() => this.startAutoListening(), 1500);
+          setTimeout(() => this.askAndListen(this.questions[this.currentIndex].question), 900);
         } else {
           this.stopCamera();
           alert('🎉 Interview completed successfully!');
@@ -244,12 +329,17 @@ export class Inverview implements OnInit {
     if (this.stream) {
       this.stream.getTracks().forEach((t) => t.stop());
       this.stream = null;
-      console.log('🎥 Camera stopped');
     }
-    this.stopFrameStreaming();
+    if (this.frameInterval) clearInterval(this.frameInterval);
   }
 
   logout() {
     this._token.logout();
+  }
+
+  extractNumericValue(value: any): number | null {
+    if (!value) return null;
+    const match = String(value).match(/(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) : null;
   }
 }
