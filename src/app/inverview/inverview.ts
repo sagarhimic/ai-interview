@@ -31,12 +31,21 @@ export class Inverview implements OnInit {
   interimTranscript = '';
   finalTranscript = '';
   silenceTimeout: any = null;
-  readonly maxSilenceDuration = 40000; // 40 sec inactivity
+  readonly maxSilenceDuration = 30000; // 40 sec inactivity
 
   // Flags updated from backend
   lastFaceDetected = true;
   lastLipMoving = false;
   proxyDetected = false;
+
+  // Recording related fields
+  private videoStream: MediaStream | null = null;   // video only (preview)
+  private micStream: MediaStream | null = null;     // mic audio only
+  private fullRecorder: MediaRecorder | null = null; // records combined video+audio
+  private fullChunks: BlobPart[] = [];
+  private questionAudioRecorder: MediaRecorder | null = null;
+  private questionAudioChunks: BlobPart[] = [];
+  private interviewRecordingStarted = false;
 
   constructor(
     private fb: FormBuilder,
@@ -89,11 +98,16 @@ export class Inverview implements OnInit {
   // -----------------------
   // Speak → Listen
   // -----------------------
-  async askAndListen(questionText: string) {
+async askAndListen(questionText: string) {
   await this.speakQuestion(questionText);
-  setTimeout(() => this.startAutoListening(), 1500);
+  // small delay for audio routing stabilization
+  setTimeout(() => {
+    // start per-question audio
+    const qid = this.questions[this.currentIndex]?.id;
+    this.startQuestionAudioRecording(qid);
+    this.startAutoListening();
+  }, 900);
 }
-
 
   // Speak Question TTS
   async speakQuestion(text: string): Promise<void> {
@@ -142,29 +156,136 @@ export class Inverview implements OnInit {
   // -----------------------
   async startCamera() {
   try {
-    // Enable audio with echo/noise cancellation
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+    // 1) video-only stream for preview (no mic -> avoids preview echo)
+    this.videoStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480 },
+      audio: false
+    });
+
+    // 2) mic-only stream (always requested so we can record audio)
+    this.micStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        autoGainControl: true,
-        sampleRate: 44100
-      }
+        autoGainControl: true
+      },
+      video: false
     });
 
-    const video = this.videoElement.nativeElement;
-    video.srcObject = this.stream;
+    // attach preview
+    const video = this.videoElement.nativeElement as HTMLVideoElement;
+    video.srcObject = this.videoStream;
     await video.play();
 
-    console.log('🎥 Camera started with echo suppression');
+    // Start streaming frames (your existing startFrameStreaming)
     setTimeout(() => this.startFrameStreaming(), 1200);
+
+    // Start full interview recorder (combined video + mic)
+    this.startFullInterviewRecording();
+
+    console.log('🎥 Camera + mic ready');
   } catch (err) {
-    console.error('Camera error:', err);
+    console.error('Camera/mic error:', err);
     alert('Please allow camera & microphone access.');
   }
 }
 
+startFullInterviewRecording() {
+  if (!this.videoElement || !this.micStream) return;
+
+  // Capture video frames from the playing video element
+  const videoEl = this.videoElement.nativeElement as HTMLVideoElement;
+  const videoCaptureStream: MediaStream = (videoEl as any).captureStream
+    ? (videoEl as any).captureStream()
+    : this.videoStream!; // fallback
+
+  // Compose combined stream: video frames + mic audio track
+  const combined = new MediaStream();
+  // add video tracks
+  videoCaptureStream.getVideoTracks().forEach(t => combined.addTrack(t));
+  // add mic audio track
+  const micTrack = this.micStream!.getAudioTracks()[0];
+  if (micTrack) combined.addTrack(micTrack);
+
+  // create MediaRecorder for full interview
+  try {
+    this.fullChunks = [];
+    this.fullRecorder = new MediaRecorder(combined, { mimeType: 'video/webm; codecs=vp9,opus' });
+  } catch (e) {
+    // fallback mimeType
+    this.fullRecorder = new MediaRecorder(combined);
+  }
+
+  this.fullRecorder.ondataavailable = (ev: any) => {
+    if (ev.data && ev.data.size) this.fullChunks.push(ev.data);
+  };
+
+  this.fullRecorder.onstop = async () => {
+    const blob = new Blob(this.fullChunks, { type: 'video/webm' });
+    // upload full video
+    await this.uploadFullVideo(blob);
+    console.log('Full interview uploaded');
+  };
+
+  this.fullRecorder.start(); // continuous recording
+  this.interviewRecordingStarted = true;
+  console.log('🔴 Full interview recording started');
+}
+
+startQuestionAudioRecording(questionId?: number) {
+  if (!this.micStream) return;
+  // reset chunks
+  this.questionAudioChunks = [];
+  try {
+    this.questionAudioRecorder = new MediaRecorder(this.micStream, { mimeType: 'audio/webm;codecs=opus' });
+  } catch (e) {
+    this.questionAudioRecorder = new MediaRecorder(this.micStream);
+  }
+
+  this.questionAudioRecorder.ondataavailable = (ev: any) => {
+    if (ev.data && ev.data.size) this.questionAudioChunks.push(ev.data);
+  };
+
+  this.questionAudioRecorder.onstop = async () => {
+    const blob = new Blob(this.questionAudioChunks, { type: 'audio/webm' });
+    // Upload to backend along with question id
+    await this.uploadQuestionAudio(blob, questionId);
+  };
+
+  this.questionAudioRecorder.start();
+  console.log('🔴 Question audio recording started');
+}
+
+stopQuestionAudioRecording() {
+  try {
+    if (this.questionAudioRecorder && this.questionAudioRecorder.state !== 'inactive') {
+      this.questionAudioRecorder.stop();
+      console.log('⏹ Question audio stopped');
+    }
+  } catch (e) { console.warn(e); }
+}
+
+// call svc.uploadQuestionAudio(formData) and svc.uploadFullVideo(formData)
+async uploadQuestionAudio(blob: Blob, questionId?: number) {
+  try {
+    const fd = new FormData();
+    fd.append('candidate_id', String(this.candidateId));
+    if (questionId) fd.append('question_id', String(questionId));
+    fd.append('audio_file', blob, `answer_q${questionId || 'unknown'}.webm`);
+    await this.svc.uploadQuestionAudio(fd).toPromise();
+    console.log('Uploaded question audio');
+  } catch (e) { console.error('uploadQuestionAudio failed', e); }
+}
+
+async uploadFullVideo(blob: Blob) {
+  try {
+    const fd = new FormData();
+    fd.append('candidate_id', String(this.candidateId));
+    fd.append('video_file', blob, `interview_${Date.now()}.webm`);
+    await this.svc.uploadFullVideo(fd).toPromise();
+    console.log('Uploaded full video');
+  } catch (e) { console.error('uploadFullVideo failed', e); }
+}
 
   startFrameStreaming() {
     if (!this.videoElement?.nativeElement) return;
@@ -253,11 +374,19 @@ export class Inverview implements OnInit {
     };
 
     this.recognition.onend = () => {
-      this.recording = false;
+    this.recording = false;
+
+    // 👀 Check visual cues before proceeding
+      if (this.lastLipMoving || this.lastFaceDetected) {
+        console.log('👄 Candidate still active, extending listening...');
+        setTimeout(() => this.startAutoListening(), 1000);
+        return;
+      }
+
       if (this.finalTranscript.trim().length > 2) {
         this.submitAnswer(this.finalTranscript);
       } else {
-        console.log('Restarting listening...');
+        console.log('No clear answer — waiting briefly before retry');
         setTimeout(() => this.startAutoListening(), 1500);
       }
     };
@@ -272,58 +401,102 @@ export class Inverview implements OnInit {
   }
 
   handleSilenceTimeout() {
-    console.warn('⏰ Silence timeout — verifying activity...');
-    if (this.lastFaceDetected || this.lastLipMoving) {
-      console.log('👀 Candidate still active — extending timeout by 15s');
-      this.silenceTimeout = setTimeout(() => this.handleSilenceTimeout(), 10000);
-      return;
-    }
+  console.warn('⏰ Checking silence timeout...');
 
-    console.log('😶 No activity — auto submitting answer');
-    this.recognition.stop();
-    this.submitAnswer(this.finalTranscript || 'No response detected');
+  // If candidate still visible or lips moving, extend timer slightly
+  if (this.lastFaceDetected || this.lastLipMoving) {
+    console.log('👀 Candidate active — extending timeout by 10s');
+    clearTimeout(this.silenceTimeout);
+    this.silenceTimeout = setTimeout(() => this.handleSilenceTimeout(), 10000);
+    return;
   }
 
+  // If not speaking and no movement for 30s
+  console.log('😶 No response — stopping recognition and moving to next question');
+  try {
+    if (this.recognition) this.recognition.stop();
+  } catch (e) {
+    console.warn('Error stopping recognition:', e);
+  }
+
+  // Submit whatever we captured so far
+  this.submitAnswer(this.finalTranscript || 'No verbal response detected');
+}
   // -----------------------
   // Submit Answer
   // -----------------------
   submitAnswer(answerText: string) {
-    if (!this.questions.length) return;
-    const q = this.questions[this.currentIndex];
-    if (!answerText.trim()) return;
+  if (!this.questions.length) return;
+  const q = this.questions[this.currentIndex];
+  if (!answerText.trim()) return;
 
-    const formData = new FormData();
-    formData.append('candidate_id', String(this.candidateId));
-    formData.append('question_id', String(q.id));
-    formData.append('answer_text', answerText.trim());
-    formData.append('candidate_skills', this.setupForm.value.candidate_skills);
-    formData.append('experience', String(this.setupForm.value.experience));
-    formData.append('job_description', this.setupForm.value.job_description);
-    formData.append('required_skills', this.setupForm.value.required_skills);
+  // Prevent duplicate submission
+  if (this.loadingSubmit) return;
 
-    this.loadingSubmit = true;
-    this.svc.submitAnswer(formData).subscribe({
-      next: (res: any) => {
-        this.loadingSubmit = false;
-        console.log(`✅ Answer submitted. Score: ${res?.accuracy_score ?? res?.accuracy}`);
-        this.finalTranscript = '';
-        this.interimTranscript = '';
+  const formData = new FormData();
+  formData.append('candidate_id', String(this.candidateId));
+  formData.append('question_id', String(q.id));
+  formData.append('answer_text', answerText.trim());
+  formData.append('candidate_skills', this.setupForm.value.candidate_skills);
+  formData.append('experience', String(this.setupForm.value.experience));
+  formData.append('job_description', this.setupForm.value.job_description);
+  formData.append('required_skills', this.setupForm.value.required_skills);
 
-        if (this.currentIndex < this.questions.length - 1) {
-          this.currentIndex++;
-          setTimeout(() => this.askAndListen(this.questions[this.currentIndex].question), 900);
-        } else {
-          this.stopCamera();
+  this.loadingSubmit = true;
+  console.log(`📤 Submitting answer for question ${this.currentIndex + 1}...`);
+
+  this.svc.submitAnswer(formData).subscribe({
+    next: (res: any) => {
+      this.loadingSubmit = false;
+      console.log(`✅ Answer submitted. Score: ${res?.accuracy_score ?? res?.accuracy}`);
+      this.finalTranscript = '';
+      this.interimTranscript = '';
+
+      if (this.currentIndex < this.questions.length - 1) {
+        // 🎤 Speak interviewer transition line first
+        this.speakText("Okay, let's move on to the next question.", () => {
+          const delay = 10000 + Math.random() * 2000; // 10–12 seconds delay
+          console.log(`⏱️ Waiting ${Math.round(delay / 1000)} seconds before next question...`);
+
+          setTimeout(() => {
+            this.currentIndex++;
+            const nextQuestion = this.questions[this.currentIndex].question;
+
+            // 🎙️ Speak next question completely before listening
+            this.speakText(nextQuestion, () => {
+              setTimeout(() => this.askAndListen(nextQuestion), 1000);
+            });
+          }, delay);
+        });
+      } else {
+        this.stopCamera();
+        this.speakText("That was the last question. Thank you for your time!", () => {
           alert('🎉 Interview completed successfully!');
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        this.loadingSubmit = false;
-        alert('Error submitting answer.');
-      },
-    });
-  }
+        });
+      }
+    },
+    error: (err) => {
+      console.error('❌ Error submitting answer:', err);
+      this.loadingSubmit = false;
+      alert('Error submitting answer.');
+    },
+  });
+}
+
+  speakText(text: string, onComplete?: () => void) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    utterance.onend = () => {
+      console.log('🗣️ Finished speaking:', text);
+      if (onComplete) onComplete();
+    };
+
+    speechSynthesis.speak(utterance);
+}
 
   stopCamera() {
     if (this.stream) {
