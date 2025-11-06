@@ -41,70 +41,61 @@
         <div class="row h-100">
 
           <!-- HEADER -->
-          <div class="col-12 d-flex align-items-center justify-content-center h-auto">
+          <header class="col-12 d-flex align-items-center justify-content-center">
             <h2 class="text-center text-white m-0">AI Technical Interview - {{ user_info?.data?.job_title }} </h2>
-          </div>
+          </header>
 
-          <!-- AI BLOCK -->
-          <div class="col-6">
-            <div class="ai-wrapper w-100 h-100 rounded-3 position-relative bg-white">
-              <!-- Question Display --> 
-              <div class="mb-4">
-                <h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
-              </div>
-              <div class="p-5 mb-5">
-                <p>{{ questions[currentIndex]?.question }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- USER BLOCK -->
-          <div class="col-6">
-            <div class="user-wrapper w-100 h-100 rounded-3 position-relative bg-white">
-              <!-- Answer Textarea (Live Speech Display) -->
-              <textarea #typedAnswer [(ngModel)]="finalTranscript" class="d-none" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
-              
-              <!-- Live Transcript Info --> 
-              @if (interimTranscript || finalTranscript){
-                <div class="p-3 mb-4">
-                  @if (interimTranscript) {
-                    <p>
-                      <strong>Interim:</strong> {{ interimTranscript }}
-                    </p>
-                  }
-                  @if (finalTranscript) {
-                    <p>
-                      <strong>Final:</strong> {{ finalTranscript }}
-                    </p>
-                  }
+          <!-- VIDEOS BLOCK -->
+          <div class="col-12 flex-grow-1 ai-user-wrapper">
+            <div class="row h-100">
+              <!-- AI BLOCK -->
+              <div class="col-6 flex-grow-1">
+                <div class="ai-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+                  <!-- Question Display -->
+                  <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5">
+                    <small class="blur-bg p-2">Q.{{ currentIndex + 1 }} / {{ questions.length }}</small>
+                    {{ questions[currentIndex]?.question }}
+                  </div>
                 </div>
-              }
-              <!-- Camera Preview -->
-              <video #video autoplay playsinline muted style="width:100%;height: 100%;" class="rounded-3"></video>
+              </div>
+
+              <!-- USER BLOCK -->
+              <div class="col-6 flex-grow-1">
+                <div class="user-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+                  <!-- Answer Textarea (Live Speech Display) -->
+                  <textarea #typedAnswer [(ngModel)]="finalTranscript" class="d-none"></textarea> 
+                  
+                  <!-- Live Transcript Info --> 
+                  @if (interimTranscript || finalTranscript){
+                    <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5">
+                      @if (interimTranscript) {
+                        {{ interimTranscript }}
+                      }
+                      @if (finalTranscript) {
+                        {{ finalTranscript }}
+                      }
+                    </div>
+                  }
+                  <!-- Camera Preview -->
+                  <video #video autoplay playsinline muted style="width:100%;height: 100%;" class="rounded-3"></video>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="col-12">
-            <!-- Auto Voice Capture Indicator --> 
-            <div class="text-center mb-4">
+          <footer class="col-12 d-flex align-items-center justify-content-center gap-3">
               @if (recording) {
                 <span class="inline-block text-white px-3 py-1 bg-success">🎙️ Listening... Please speak your answer</span>
               } @else {
                 <span class="inline-block px-3 py-1 bg-secondary text-white"> Waiting for next question... </span>
               }
-            </div>
-
-            <!-- Manual Submit Buttons (optional) --> 
-            <div class="flex justify-center gap-4 mb-4">
-              <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Typed</button>
-              <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Spoken</button>
+              <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Typed</button>
+              <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Spoken</button>
+              <button class="logout-btn" (click)="logout()">Logout</button>
               @if (loadingSubmit){
                 <span>Submitting...</span>
               }
-            </div>
-
-            <button class="logout-btn" (click)="logout()">Logout</button> 
-          </div>
+          </footer>
 
         </div>
       </div>

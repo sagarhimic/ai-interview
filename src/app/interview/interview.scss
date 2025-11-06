@@ -211,6 +211,13 @@ textarea {
 
 }
 
+header,footer{height: 80px;}
+.ai-user-wrapper{height: calc(100% - 200px);}
 
+.qtn-ans-wrapper{width: 80%;bottom:20px;font-size: 0.875rem;  font-weight: 300;  padding: 8px 15px;}
 
-.ai-wrapper{background: #fff;position: relative;border-radius: 10px;}
+.blur-bg{
+background: #3B434C;
+backdrop-filter: blur(11px);
+-webkit-backdrop-filter: blur(11px);
+}
