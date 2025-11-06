@@ -1,23 +1,25 @@
-<main class="w-100 h-100 d-flex py-3">
+<main class="w-100 h-100 d-flex p-5">
   <!-- Hidden Form Fields -->
-  <div class="w-75 h-75 overflow-hidden bg-white p-4 rounded-5 m-auto">
-    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()" class="h-100 overflow-auto">
-      <div class="hidden"> <input type="hidden" formControlName="job_title" /> 
+  <div class="h-100 w-75 overflow-hidden bg-white p-4 rounded-5 m-auto">
+    <h1 class="mb-4 h3 text-center">Instructions</h1>
+    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()" class="h-85 overflow-auto">
+      <div class="hidden">
+        <input type="hidden" formControlName="job_title" /> 
         <input type="hidden" formControlName="job_description" /> 
         <input type="hidden" formControlName="duration" /> 
         <input type="hidden" formControlName="experience" /> 
         <input type="hidden" formControlName="required_skills" /> 
         <input type="hidden" formControlName="candidate_skills" /> 
-      </div> 
+      </div>
       <!-- Start Interview Section --> 
       @if (!questions.length){
         <div class="text-center">
-          <h1 class="mb-4 h3">Instructions</h1>
-          <ul class="instructions">
+          
+          <ul class="instructions list-unstyled">
 
             @for (item of instructions; track $index) {
               <li class="d-flex align-items-center w-100">
-                <img [src]="item.img" width="72" height="72" [alt]="item.title" />
+                <img [src]="item.img" width="64" height="64" [alt]="item.title" />
 
                 <div class="d-flex flex-column align-items-start ms-3 text-start">
                   <h6 class="mb-2">{{ item.title }}</h6>
@@ -27,11 +29,12 @@
             }
           </ul>
 
-          <button type="submit" [disabled]="loadingGenerate" class="px-6 py-3 text-white"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
+          <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
         </div>
       }
     </form>
   </div>
+</main>
   <!-- ====================== INTERVIEW SECTION ====================== --> 
   @if (questions.length){
     <!-- Header -->
@@ -91,4 +94,3 @@
       </div>
     </div>
   }
-</main>

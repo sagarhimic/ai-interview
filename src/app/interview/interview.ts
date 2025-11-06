@@ -63,16 +63,41 @@ export class Interview implements OnInit {
       text: `After clicking <span class="purple-text-color">"GET STARTED"</span>, avoid using the back button, viewing your browsing history, or opening a new window. Doing so will immediately end your interview session.`
     },
     {
-      img: '/img/web-security.png',
+      img: '/img/web-camera.png',
       title: 'Camera Usage:',
       text: `Ensure your camera remains on throughout the interview. Turning it off at any point will result in the interview ending automatically.`
     },
-
     {
-      img: '/img/web-security.png',
+      img: '/img/working-time.png',
       title: 'Timeliness:',
       text: `Complete the interview within your scheduled time. If the allotted time expires, the interview will automatically conclude.`
+    },
+    {
+      img: '/img/wireless-connection.png',
+      title: 'Internet Connectivity:',
+      text: `Ensure a stable internet connection to avoid interruptions duirng the interview.`
+    },
+    {
+      img: '/img/maintenance.png',
+      title: 'Technical Issues:',
+      text: `If you face any technical difficulties, please contact us via email at <span class="purple-text-color">[mail id]</span>.`
+    },
+    {
+      img: '/img/padlock.png',
+      title: 'Re-Login Policy:',
+      text: `Once you log out of the interview, re-login is not allowed.`
+    },
+    {
+      img: '/img/video-camera.png',
+      title: 'Recording Notice:',
+      text: `The entire interview will be recorded for review purposes.`
+    },
+    {
+      img: '/img/voice-message.png',
+      title: 'Answer Capturing:',
+      text: `Your answers will be recorded between the moment you click <span class="purple-text-color">"Start Answer"</span> and <span class="purple-text-color">"End Answer"</span>.`
     }
+
   ];
 
 

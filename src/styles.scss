@@ -10,9 +10,16 @@
 .secondary-bg-color{background-color: var(--primary-color);}
 
 
+.h-80{height: 80% !important;}
+.h-85{height: 85% !important;}
+.h-90{height: 90% !important;}
+.h-95{height: 95% !important;}
+
+
 html,
 body {
   height: 100%;
+  font-family: 'Inter', sans-serif;
 }
 
 body{
