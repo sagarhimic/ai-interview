@@ -20,11 +20,13 @@ export class Login {
     form  : any;
     user_info : any;
 
-    constructor(private fb: FormBuilder,
-       private http: HttpClient,
-        private router: Router,
-        private auth: Auth,
-      private _token:Token) {
+    constructor(
+      private fb: FormBuilder,
+      private http: HttpClient,
+      private router: Router,
+      private auth: Auth,
+      private _token:Token
+    ) {
       this.form = this.fb.group({
         meeting_id: ['', Validators.required],
         password: ['', Validators.required],

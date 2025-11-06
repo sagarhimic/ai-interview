@@ -1,0 +1,94 @@
+<main class="w-100 h-100 d-flex py-3">
+  <!-- Hidden Form Fields -->
+  <div class="w-75 h-75 overflow-hidden bg-white p-4 rounded-5 m-auto">
+    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()" class="h-100 overflow-auto">
+      <div class="hidden"> <input type="hidden" formControlName="job_title" /> 
+        <input type="hidden" formControlName="job_description" /> 
+        <input type="hidden" formControlName="duration" /> 
+        <input type="hidden" formControlName="experience" /> 
+        <input type="hidden" formControlName="required_skills" /> 
+        <input type="hidden" formControlName="candidate_skills" /> 
+      </div> 
+      <!-- Start Interview Section --> 
+      @if (!questions.length){
+        <div class="text-center">
+          <h1 class="mb-4 h3">Instructions</h1>
+          <ul class="instructions">
+
+            @for (item of instructions; track $index) {
+              <li class="d-flex align-items-center w-100">
+                <img [src]="item.img" width="72" height="72" [alt]="item.title" />
+
+                <div class="d-flex flex-column align-items-start ms-3 text-start">
+                  <h6 class="mb-2">{{ item.title }}</h6>
+                  <p class="m-0" [innerHTML]="item.text"></p>
+                </div>
+              </li>
+            }
+          </ul>
+
+          <button type="submit" [disabled]="loadingGenerate" class="px-6 py-3 text-white"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
+        </div>
+      }
+    </form>
+  </div>
+  <!-- ====================== INTERVIEW SECTION ====================== --> 
+  @if (questions.length){
+    <!-- Header -->
+    <div class="mb-6 pb-3">
+      <h2 class=""> AI Technical Interview - {{ user_info?.data?.job_title }} </h2>
+      <button class="logout-btn" (click)="logout()">Logout</button> 
+    </div>
+
+    <div class="mt-6">
+      <!-- Camera Preview -->
+      <div class="mb-6">
+        <video #video autoplay playsinline muted width="480" height="360" class="rounded-lg border shadow"></video>
+      </div>
+
+      <!-- Question Display --> 
+      <div class="mb-4">
+        <h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
+      </div>
+      <div class="p-5 mb-5">
+        <p>{{ questions[currentIndex]?.question }}</p>
+      </div>
+      
+      <!-- Answer Textarea (Live Speech Display) -->
+      <textarea #typedAnswer [(ngModel)]="finalTranscript" class="p-3 border mb-4" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
+      
+      <!-- Live Transcript Info --> 
+      @if (interimTranscript || finalTranscript){
+        <div class="p-3 mb-4">
+          @if (interimTranscript) {
+            <p>
+              <strong>Interim:</strong> {{ interimTranscript }}
+            </p>
+          }
+          @if (finalTranscript) {
+            <p>
+              <strong>Final:</strong> {{ finalTranscript }}
+            </p>
+          }
+        </div>
+      }
+      <!-- Auto Voice Capture Indicator --> 
+      <div class="text-center mb-4">
+        @if (recording) {
+          <span class="inline-block text-white px-3 py-1">🎙️ Listening... Please speak your answer</span>
+        } @else {
+          <span class="inline-block px-3 py-1"> Waiting for next question... </span>
+        }
+      </div>
+
+      <!-- Manual Submit Buttons (optional) --> 
+      <div class="flex justify-center gap-4 mb-4">
+        <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Typed</button>
+        <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Spoken</button>
+        @if (loadingSubmit){
+          <span>Submitting...</span>
+        }
+      </div>
+    </div>
+  }
+</main>

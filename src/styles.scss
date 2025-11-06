@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+:root{
+    --primary-text-color: #020213;
+    --secondary-text-color: #293951;
+    --primary-color: #605DFF;
+}
+
+.purple-text-color{color: var(--primary-color);}
+.primary-text-color{color: var(--primary-text-color);}
+.secondary-text-color{color: var(--secondary-text-color);}
+.secondary-bg-color{background-color: var(--primary-color);}
+
+
+html,
+body {
+  height: 100%;
+}
+
+body{
+    background: #101A25;
+    position: relative;
+
+    &::before{
+        content: '';
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: url(/img/bg.png) no-repeat;
+        background-size: cover;
+        background-position: center center;
+        opacity: 0.45;
+        z-index: -1;
+    }
+}

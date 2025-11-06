@@ -4,14 +4,20 @@ import { CommonModule } from '@angular/common';
 import { Interviews } from '../core/_services/Interviews';
 import { Token } from '../core/_services/token';
 
+interface Instruction {
+  img: string;
+  title: string;
+  text: string;
+}
+
 @Component({
-  selector: 'app-inverview',
+  selector: 'app-interview',
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, CommonModule],
-  templateUrl: './inverview.html',
-  styleUrl: './inverview.scss',
+  templateUrl: './interview.html',
+  styleUrl: './interview.scss',
 })
-export class Inverview implements OnInit {
+export class Interview implements OnInit {
   @ViewChild('video') videoElement!: ElementRef<HTMLVideoElement>;
 
   setupForm!: FormGroup;
@@ -46,6 +52,30 @@ export class Inverview implements OnInit {
   private questionAudioRecorder: MediaRecorder | null = null;
   private questionAudioChunks: BlobPart[] = [];
   private interviewRecordingStarted = false;
+
+
+
+
+  instructions: Instruction[] = [
+    {
+      img: '/img/web-security.png',
+      title: 'Navigating the Interview Platform:',
+      text: `After clicking <span class="purple-text-color">"GET STARTED"</span>, avoid using the back button, viewing your browsing history, or opening a new window. Doing so will immediately end your interview session.`
+    },
+    {
+      img: '/img/web-security.png',
+      title: 'Camera Usage:',
+      text: `Ensure your camera remains on throughout the interview. Turning it off at any point will result in the interview ending automatically.`
+    },
+
+    {
+      img: '/img/web-security.png',
+      title: 'Timeliness:',
+      text: `Complete the interview within your scheduled time. If the allotted time expires, the interview will automatically conclude.`
+    }
+  ];
+
+
 
   constructor(
     private fb: FormBuilder,

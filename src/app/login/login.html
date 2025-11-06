@@ -1,33 +1,21 @@
-<div class="login-container">
-  <h2>Login</h2>
-  <form [formGroup]="form" (ngSubmit)="login()">
-    <div>
-      <label>Meeting ID</label>
-      <input formControlName="meeting_id" placeholder="Enter Meeting ID" />
-    </div>
-
-    <div>
-      <label>Password</label>
-      <input type="password" formControlName="password" placeholder="Enter Password" />
-    </div>
-
-    <button type="submit" [disabled]="loading">Login</button>
-
-    <p *ngIf="errorMessage" style="color:red">{{ errorMessage }}</p>
-  </form>
-</div>
-
-<style>
-.login-container {
-  max-width: 400px;
-  margin: 100px auto;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-input, button {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-}
-</style>
+<main class="w-100 h-100 d-flex py-5">
+  <div class="form-signin m-auto bg-white p-5 rounded-5">
+    <form [formGroup]="form" (ngSubmit)="login()" autocomplete="off">
+      <!-- <img class="mb-4" src="/img/logo-white.png" alt="" height="40"> -->
+      <h1 class="h3 fw-bold mb-1">Join Interview</h1>
+      <small>Enter credentials to get started</small>
+      <div class="form-floating mt-4">
+        <input type="email" class="form-control" id="meetingId" formControlName="meeting_id" placeholder="Enter Meeting ID">
+        <label for="meetingId">Meeting ID</label>
+      </div>
+      <div class="form-floating mt-3">
+        <input type="password" class="form-control" id="floatingPassword" formControlName="password" placeholder="Enter Password" >
+        <label for="floatingPassword">Password</label>
+      </div>
+      @if(errorMessage){
+        <span style="font-size: 0.688rem;" class="d-flex mt-3 px-2 py-1 fw-semibold text-danger-emphasis bg-danger-subtle border border-danger-subtle rounded-2 text-center">{{ errorMessage }}</span>
+      }
+      <button class="btn btn-primary w-100 py-2 mt-3" type="submit" [disabled]="loading">Submit</button>
+    </form>
+  </div>
+</main>
