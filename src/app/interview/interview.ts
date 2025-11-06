@@ -134,8 +134,9 @@ startFrameAnalysis() {
       if (!blob) return;
 
       const formData = new FormData();
-      const candidateId = localStorage.getItem('candidate_id') || '123';
-      formData.append('candidate_id', candidateId);
+      const candidateID = this._token.getUserData();
+
+      formData.append('candidate_id', candidateID.data.candidate_id);
       formData.append('frame', blob, 'frame.jpg');
 
       this.svc.dataFrameSet(formData).subscribe({
@@ -201,9 +202,6 @@ submitAnswer(answer: string) {
   const formData = new FormData();
   const candidateID = this._token.getUserData();
 
-
-  console.log(candidateID.data);
-  
   formData.append('candidate_id', candidateID.data.candidate_id);
   formData.append('question_id', currentQ.id);
   formData.append('answer_text', answer);
