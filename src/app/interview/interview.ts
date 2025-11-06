@@ -35,6 +35,9 @@ export class Interview implements OnInit {
   statusMessage: string = '';
   timeLeft = 20;
   timerInterval: any;
+  recognition: any;       // speech recognition instance
+  isListening = false;
+  speechTimer: any;
 
   instructions: Instruction[] = [
     {
@@ -224,17 +227,23 @@ submitAnswer(answer: string) {
 
   /** 🎯 Move to next question */
   nextQuestion() {
-    if (this.currentIndex + 1 < this.questions.length) {
-      this.currentIndex++;
-      this.finalTranscript = '';
-      this.startQuestionTimer();
-      this.playTTS(this.questions[this.currentIndex].question);
-    } else {
-      this.stopCamera();
-      this.playTTS("Thank you! The interview is now complete.");
-      alert('Interview finished');
-    }
+  if (this.currentIndex + 1 < this.questions.length) {
+    this.currentIndex++;
+    this.finalTranscript = '';
+    this.interimTranscript = '';
+    this.startQuestionTimer();
+    this.playTTS(this.questions[this.currentIndex].question);
+
+    // restart listening
+    this.stopListening();
+    setTimeout(() => this.startListening(), 1000); // small delay after question TTS
+  } else {
+    this.stopListening();
+    this.stopCamera();
+    this.playTTS('Thank you! The interview is now complete.');
+    alert('Interview finished');
   }
+}
 
   /** 🔊 Play interviewer voice using Web Speech API (no backend) */
 playTTS(text: string) {
@@ -261,9 +270,8 @@ playTTS(text: string) {
   );
   if (preferredVoice) utterance.voice = preferredVoice;
 
-  utterance.onstart = () => console.log('🗣️ Interviewer speaking:', text);
-  utterance.onend = () => console.log('✅ Finished speaking');
-
+  utterance.onstart = () => this.stopListening(); // pause listening during interviewer voice
+  utterance.onend = () => this.startListening();  // resume listening after
   window.speechSynthesis.speak(utterance);
 }
 
@@ -284,6 +292,8 @@ generateQuestions() {
 
       // ✅ Start interview session
       await this.startCamera();
+      this.initSpeechRecognition();
+      this.startListening(); // Start capturing candidate's speech
       this.playTTS(this.questions[0].question);
       this.startQuestionTimer();
     },
@@ -293,6 +303,75 @@ generateQuestions() {
     }
   });
 }
+
+/** 🎤 Initialize Web Speech Recognition */
+initSpeechRecognition() {
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    console.error('Speech Recognition not supported in this browser.');
+    return;
+  }
+
+  this.recognition = new SpeechRecognition();
+  this.recognition.continuous = true;
+  this.recognition.interimResults = true;
+  this.recognition.lang = 'en-US';
+
+  this.recognition.onstart = () => {
+    console.log('🎙️ Listening...');
+    this.isListening = true;
+    this.recording = true;
+    this.interimTranscript = '';
+    this.finalTranscript = '';
+  };
+
+  this.recognition.onresult = (event: any) => {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        this.finalTranscript += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
+    }
+    this.interimTranscript = interim.trim();
+  };
+
+  this.recognition.onerror = (event: any) => {
+    console.error('Speech recognition error:', event.error);
+    this.isListening = false;
+    this.recording = false;
+  };
+
+  this.recognition.onend = () => {
+    console.log('🛑 Speech recognition stopped.');
+    this.isListening = false;
+    this.recording = false;
+
+    // Auto-submit after user stops speaking for a few seconds
+    if (this.finalTranscript.trim().length > 0) {
+      console.log('Auto submitting answer:', this.finalTranscript);
+      this.autoSubmitAnswer();
+    }
+  };
+}
+
+/** 🧠 Start listening */
+startListening() {
+  if (this.recognition && !this.isListening) {
+    this.recognition.start();
+  }
+}
+
+/** 🧠 Stop listening */
+stopListening() {
+  if (this.recognition && this.isListening) {
+    this.recognition.stop();
+  }
+}
+
 
   logout() {
     this._token.logout();
