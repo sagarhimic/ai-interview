@@ -1,3 +1,4 @@
+@if (!questions.length){
 <main class="w-100 h-100 d-flex p-5">
   <!-- Hidden Form Fields -->
   <div class="h-100 w-75 overflow-hidden bg-white p-4 rounded-5 m-auto">
@@ -12,101 +13,104 @@
         <input type="hidden" formControlName="candidate_skills" /> 
       </div>
       <!-- Start Interview Section --> 
-      @if (!questions.length){
-        <div class="text-center">
-          
-          <ul class="instructions list-unstyled">
+      <div class="text-center">
+        <ul class="instructions list-unstyled">
+          @for (item of instructions; track $index) {
+            <li class="d-flex align-items-center w-100">
+              <img [src]="item.img" width="64" height="64" [alt]="item.title" />
 
-            @for (item of instructions; track $index) {
-              <li class="d-flex align-items-center w-100">
-                <img [src]="item.img" width="64" height="64" [alt]="item.title" />
-
-                <div class="d-flex flex-column align-items-start ms-3 text-start">
-                  <h6 class="mb-2">{{ item.title }}</h6>
-                  <p class="m-0" [innerHTML]="item.text"></p>
-                </div>
-              </li>
-            }
-          </ul>
-
-          <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
-        </div>
-      }
+              <div class="d-flex flex-column align-items-start ms-3 text-start">
+                <h6 class="mb-2">{{ item.title }}</h6>
+                <p class="m-0" [innerHTML]="item.text"></p>
+              </div>
+            </li>
+          }
+        </ul>
+        <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
+      </div>
     </form>
   </div>
 </main>
+}
   <!-- ====================== INTERVIEW SECTION ====================== --> 
   @if (questions.length){
-    <!-- Header -->
-    <div class="mb-6 pb-3">
-      <h2 class=""> AI Technical Interview - {{ user_info?.data?.job_title }} </h2>
-      <button class="logout-btn" (click)="logout()">Logout</button> 
-    </div>
+    <main class="w-100 h-100 d-flex p-3">
+    <div class="row h-100">
+      <!-- LEFT -->
+      <div class="col-9 h-100">
+        <div class="row h-100">
 
-    <div class="mt-6">
-      <!-- Camera Preview -->
-      <div class="mb-6">
-        <video #video autoplay playsinline muted width="480" height="360" class="rounded-lg border shadow"></video>
-      </div>
-
-      <!-- Question Display --> 
-      <div class="mb-4 d-flex align-items-center justify-content-between">
-        <h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
-        <p class="text-danger fw-bold">⏳ Time left: {{ timeLeft }}s</p>
-      </div>
-      <div class="p-5 mb-5">
-        <p>{{ questions[currentIndex]?.question }}</p>
-        @if (statusMessage) {
-          <div class="alert alert-warning mt-3">
-           {{ statusMessage }}
+          <!-- HEADER -->
+          <div class="col-12 d-flex align-items-center justify-content-center h-auto">
+            <h2 class="text-center text-white m-0">AI Technical Interview - {{ user_info?.data?.job_title }} </h2>
           </div>
-        }
-      </div>
-      
-      <!-- Answer Textarea (Live Speech Display) -->
-      <textarea #typedAnswer [(ngModel)]="finalTranscript" class="p-3 border mb-4" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
-      
-      <!-- Live Transcript Info --> 
-      @if (interimTranscript || finalTranscript){
-        <div class="p-3 mb-4">
-          @if (interimTranscript) {
-            <p>
-              <strong>Interim:</strong> {{ interimTranscript }}
-            </p>
-          }
-          @if (finalTranscript) {
-            <p>
-              <strong>Final:</strong> {{ finalTranscript }}
-            </p>
-          }
+
+          <!-- AI BLOCK -->
+          <div class="col-6">
+            <div class="ai-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+              <!-- Question Display --> 
+              <div class="mb-4">
+                <h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
+              </div>
+              <div class="p-5 mb-5">
+                <p>{{ questions[currentIndex]?.question }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- USER BLOCK -->
+          <div class="col-6">
+            <div class="user-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+              <!-- Answer Textarea (Live Speech Display) -->
+              <textarea #typedAnswer [(ngModel)]="finalTranscript" class="p-3 border mb-4" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
+              
+              <!-- Live Transcript Info --> 
+              @if (interimTranscript || finalTranscript){
+                <div class="p-3 mb-4">
+                  @if (interimTranscript) {
+                    <p>
+                      <strong>Interim:</strong> {{ interimTranscript }}
+                    </p>
+                  }
+                  @if (finalTranscript) {
+                    <p>
+                      <strong>Final:</strong> {{ finalTranscript }}
+                    </p>
+                  }
+                </div>
+              }
+              <!-- Camera Preview -->
+              <video #video autoplay playsinline muted style="width:100%;height: 100%;" class="rounded-3"></video>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <!-- Auto Voice Capture Indicator --> 
+            <div class="text-center mb-4">
+              @if (recording) {
+                <span class="inline-block text-white px-3 py-1">🎙️ Listening... Please speak your answer</span>
+              } @else {
+                <span class="inline-block px-3 py-1"> Waiting for next question... </span>
+              }
+            </div>
+
+            <!-- Manual Submit Buttons (optional) --> 
+            <div class="flex justify-center gap-4 mb-4">
+              <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Typed</button>
+              <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Spoken</button>
+              @if (loadingSubmit){
+                <span>Submitting...</span>
+              }
+            </div>
+
+            <button class="logout-btn" (click)="logout()">Logout</button> 
+          </div>
+
         </div>
-      }
-      <!-- Auto Voice Capture Indicator --> 
-      <!-- <div class="text-center mb-4">
-        @if (recording) {
-          <span class="inline-block text-white px-3 py-1">🎙️ Listening... Please speak your answer</span>
-        } @else {
-          <span class="inline-block px-3 py-1"> Waiting for next question... </span>
-        }
-      </div> -->
-
-      <div class="text-center mb-4">
-          @if (status === 'paused') {
-            <span class="inline-block text-red-600 font-bold">🚫 Interview paused due to proxy detection.</span>
-          } 
-          @else if (status === 'idle') {
-            <span class="inline-block text-yellow-600 font-bold">⚠️ You seem inactive — please stay focused.</span>
-          }
-        </div>
-
-
-      <!-- Manual Submit Buttons (optional) --> 
-      <div class="flex justify-center gap-4 mb-4">
-        <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Typed</button>
-        <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="px-5 py-2 text-white">Submit Spoken</button>
-        @if (loadingSubmit){
-          <span>Submitting...</span>
-        }
       </div>
+      <!-- RIGHT -->
+      <div class="col-3">Right</div>
+
     </div>
+    </main>
   }
