@@ -47,11 +47,17 @@
       </div>
 
       <!-- Question Display --> 
-      <div class="mb-4">
+      <div class="mb-4 d-flex align-items-center justify-content-between">
         <h3>Question {{ currentIndex + 1 }} / {{ questions.length }}</h3>
+        <p class="text-danger fw-bold">⏳ Time left: {{ timeLeft }}s</p>
       </div>
       <div class="p-5 mb-5">
         <p>{{ questions[currentIndex]?.question }}</p>
+        @if (statusMessage) {
+          <div class="alert alert-warning mt-3">
+           {{ statusMessage }}
+          </div>
+        }
       </div>
       
       <!-- Answer Textarea (Live Speech Display) -->
@@ -73,13 +79,23 @@
         </div>
       }
       <!-- Auto Voice Capture Indicator --> 
-      <div class="text-center mb-4">
+      <!-- <div class="text-center mb-4">
         @if (recording) {
           <span class="inline-block text-white px-3 py-1">🎙️ Listening... Please speak your answer</span>
         } @else {
           <span class="inline-block px-3 py-1"> Waiting for next question... </span>
         }
-      </div>
+      </div> -->
+
+      <div class="text-center mb-4">
+          @if (status === 'paused') {
+            <span class="inline-block text-red-600 font-bold">🚫 Interview paused due to proxy detection.</span>
+          } 
+          @else if (status === 'idle') {
+            <span class="inline-block text-yellow-600 font-bold">⚠️ You seem inactive — please stay focused.</span>
+          }
+        </div>
+
 
       <!-- Manual Submit Buttons (optional) --> 
       <div class="flex justify-center gap-4 mb-4">
