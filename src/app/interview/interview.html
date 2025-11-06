@@ -62,7 +62,7 @@
           <div class="col-6">
             <div class="user-wrapper w-100 h-100 rounded-3 position-relative bg-white">
               <!-- Answer Textarea (Live Speech Display) -->
-              <textarea #typedAnswer [(ngModel)]="finalTranscript" class="p-3 border mb-4" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
+              <textarea #typedAnswer [(ngModel)]="finalTranscript" class="d-none" placeholder="Your spoken or typed answer will appear here..." rows="5" ></textarea> 
               
               <!-- Live Transcript Info --> 
               @if (interimTranscript || finalTranscript){
