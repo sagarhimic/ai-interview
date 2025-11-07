@@ -1,7 +1,10 @@
 @if (!questions.length){
-<main class="w-100 h-100 d-flex flex-column p-5">
-  <!-- Hidden Form Fields -->
-    <h1 class="mb-4 h3 text-center text-white fw-bold">Instructions</h1>
+  <main class="w-100 min-vh-100 d-flex flex-column p-5">
+    <!-- Hidden Form Fields -->
+    <div class="d-flex flex-column mb-4 text-center text-white">
+      <h1 class="mb-1 h3 fw-bold">Interview Guidelines</h1>
+      <small>Please read the instructions carefully before beginning your interview.</small>
+    </div>
     <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
       <div class="hidden">
         <input type="hidden" formControlName="job_title" /> 
@@ -27,10 +30,10 @@
             </li>
           }
         </ul>
-        <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
+        <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary btn-lg"> {{ loadingGenerate ? 'Generating...' : 'Get Started' }} </button> 
       </div>
     </form>
-</main>
+  </main>
 }
   <!-- ====================== INTERVIEW SECTION ====================== --> 
   @if (questions.length){

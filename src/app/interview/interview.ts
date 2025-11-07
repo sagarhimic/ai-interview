@@ -58,22 +58,22 @@ export class Interview implements OnInit {
     {
       img: '/img/web-security.png',
       title: 'Navigating the Interview Platform:',
-      text: `After clicking <span class="purple-text-color">"GET STARTED"</span>, avoid using the back button, viewing your browsing history, or opening a new window. Doing so will immediately end your interview session.`
+      text: `After clicking <span class="purple-text-color">"Get Started"</span>, do not use the back button, open a new tab/window, or view your browsing history. Doing so will automatically end your interview session.`
     },
     {
       img: '/img/web-camera.png',
       title: 'Camera Usage:',
-      text: `Ensure your camera remains on throughout the interview. Turning it off at any point will result in the interview ending automatically.`
+      text: `Your camera must remain <span class="purple-text-color">on at all times</span> during the interview. If the camera is turned off or disabled, the interview will end immediately.`
     },
     {
       img: '/img/working-time.png',
       title: 'Timeliness:',
-      text: `Complete the interview within your scheduled time. If the allotted time expires, the interview will automatically conclude.`
+      text: `Complete the interview within the allotted time. When the scheduled time ends, the interview will automatically close.`
     },
     {
       img: '/img/wireless-connection.png',
       title: 'Internet Connectivity:',
-      text: `Ensure a stable internet connection to avoid interruptions duirng the interview.`
+      text: `Ensure you have a <span class="purple-text-color">stable and uninterrupted internet connection</span> to avoid disruptions.`
     },
     {
       img: '/img/maintenance.png',
@@ -83,17 +83,17 @@ export class Interview implements OnInit {
     {
       img: '/img/padlock.png',
       title: 'Re-Login Policy:',
-      text: `Once you log out of the interview, re-login is not allowed.`
+      text: `Once you log out or exit the interview, <span class="purple-text-color">re-login is not permitted</span>.`
     },
     {
       img: '/img/video-camera.png',
       title: 'Recording Notice:',
-      text: `The entire interview will be recorded for review purposes.`
+      text: `The entire interview session will be <span class="purple-text-color">recorded for evaluation and review</span> purposes.`
     },
     {
       img: '/img/voice-message.png',
       title: 'Answer Capturing:',
-      text: `Your answers will be recorded between the moment you click <span class="purple-text-color">"Start Answer"</span> and <span class="purple-text-color">"End Answer"</span>.`
+      text: `All your responses will be <span class="purple-text-color">recorded and stored as transcripts</span> for review purposes.`
     }
   ];
 
