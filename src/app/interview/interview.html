@@ -111,12 +111,12 @@
         <div class="card h-100 rounded-5">
           <div class="card-body">
             
-            <div class="summary-wrapper">
+            <div class="summary-wrapper h-75">
               <h6>Summary</h6>
-              <ul class="list-unstyled">
+              <ul class="list-unstyled h-100 overflow-auto d-flex flex-column-reverse">
                 @for (item of summary; track $index) {
-                  <li class="summary-qtn"><strong>Ai Interviewer:</strong> {{ item.qtn }}</li>
-                  <li class="summary-ans"><strong>Candidate:</strong> {{ item.ans }}</li>
+                  <li class="summary-qtn"><strong>Ai Interviewer:</strong> {{ item.question_text }}</li>
+                  <li class="summary-ans"><strong>Candidate:</strong> {{ item.answer_text }}</li>
                 }
               </ul>
             </div>
