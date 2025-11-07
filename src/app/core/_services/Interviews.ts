@@ -36,6 +36,11 @@ export class Interviews {
     return this.http.post(`${this.base}/submit-answer/`, data, options);
   }
 
+  getSummary(data: any): Observable<any> {
+    const options = this.getHttpOptions();
+    return this.http.post(`${this.base}/get-candidate-answers/`, data, options);
+  }
+
   /** Send Frame for Face/Lip Detection */
   dataFrameSet(data: any): Observable<any> {
     const options = this.getHttpOptions();

@@ -10,10 +10,6 @@ interface Instruction {
   title: string;
   text: string;
 }
-interface Summary {
-  qtn: string;
-  ans: string;
-}
 
 @Component({
   selector: 'app-interview',
@@ -42,17 +38,7 @@ export class Interview implements OnInit {
   recognition: any;       // speech recognition instance
   isListening = false;
   speechTimer: any;
-
-  summary: Summary[] = [
-    {
-      qtn: 'Question 01 goes here',
-      ans: 'Answer 01 goes here'
-    },
-    {
-      qtn: 'Question 02 goes here',
-      ans: 'Answer 02 goes here'
-    },
-  ];
+  summary: any = [];
 
   instructions: Instruction[] = [
     {
@@ -228,6 +214,7 @@ submitAnswer(answer: string) {
     next: (response: any) => {
       console.log('✅ Answer submitted successfully:', response);
       this.loadingSubmit = false;
+      this.getCandidateSummary();
       this.nextQuestion();
     },
     error: (err) => {
@@ -308,6 +295,7 @@ generateQuestions() {
       this.startListening(); // Start capturing candidate's speech
       this.playTTS(this.questions[0].question);
       this.startQuestionTimer();
+      this.getCandidateSummary();
     },
     error: (err) => {
       console.error('Error generating questions', err);
@@ -384,6 +372,27 @@ stopListening() {
   }
 }
 
+getCandidateSummary() {
+  
+  this.loadingSubmit = true;
+  const formData = new FormData();
+  const candidateID = this._token.getUserData();
+
+  console.log(candidateID);
+
+  formData.append('candidate_id', candidateID.data.candidate_id);
+
+  this.svc.getSummary(formData).subscribe({
+    next: (response: any) => {
+      this.summary = response.answers;
+      console.log(this.summary);
+    },
+    error: (err) => {
+      console.error('❌ Error submitting answer:', err);
+      this.loadingSubmit = false;
+    }
+  });
+}
 
   logout() {
     this._token.logout();
