@@ -7,8 +7,10 @@
 .purple-text-color{color: var(--primary-color);}
 .primary-text-color{color: var(--primary-text-color);}
 .secondary-text-color{color: var(--secondary-text-color);}
+
 .secondary-bg-color{background-color: var(--primary-color);}
 
+.primary-bg-color{background-color: var(--primary-color);}
 
 .h-80{height: 80% !important;}
 .h-85{height: 85% !important;}
@@ -40,3 +42,9 @@ body{
         z-index: -1;
     }
 }
+
+
+.gradient-text{background: linear-gradient(to right, #30CFD0 0%, #330867 100%);
+	-webkit-background-clip: text;
+    background-clip: text;
+	-webkit-text-fill-color: transparent;}
