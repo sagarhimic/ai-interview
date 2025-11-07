@@ -1,9 +1,8 @@
 @if (!questions.length){
-<main class="w-100 h-100 d-flex p-5">
+<main class="w-100 h-100 d-flex flex-column p-5">
   <!-- Hidden Form Fields -->
-  <div class="h-100 w-75 overflow-hidden bg-white p-4 rounded-5 m-auto">
-    <h1 class="mb-4 h3 text-center">Instructions</h1>
-    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()" class="h-85 overflow-auto">
+    <h1 class="mb-4 h3 text-center text-white fw-bold">Instructions</h1>
+    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
       <div class="hidden">
         <input type="hidden" formControlName="job_title" /> 
         <input type="hidden" formControlName="job_description" /> 
@@ -14,14 +13,16 @@
       </div>
       <!-- Start Interview Section --> 
       <div class="text-center">
-        <ul class="instructions list-unstyled">
+        <ul class="instructions list-unstyled row g-3">
           @for (item of instructions; track $index) {
-            <li class="d-flex align-items-center w-100">
-              <img [src]="item.img" width="64" height="64" [alt]="item.title" />
+            <li class="col-md-3">
+              <div class="d-flex flex-column align-items-center instruction-block blur shadow">
+                <img [src]="item.img" width="64" height="64" [alt]="item.title" />
 
-              <div class="d-flex flex-column align-items-start ms-3 text-start">
-                <h6 class="mb-2">{{ item.title }}</h6>
-                <p class="m-0" [innerHTML]="item.text"></p>
+                <div class="d-flex flex-column align-items-start ms-3 text-center">
+                  <h6 class="mb-2 mt-4 w-100 text-center fw-bold">{{ item.title }}</h6>
+                  <p class="m-0 text-center" [innerHTML]="item.text"></p>
+                </div>
               </div>
             </li>
           }
@@ -29,13 +30,12 @@
         <button type="submit" [disabled]="loadingGenerate" class="btn btn-primary"> {{ loadingGenerate ? 'Generating...' : 'Start Interview' }} </button> 
       </div>
     </form>
-  </div>
 </main>
 }
   <!-- ====================== INTERVIEW SECTION ====================== --> 
   @if (questions.length){
-    <main class="w-100 h-100 d-flex p-3">
-    <div class="row h-100">
+    <main class="w-100 h-100 p-3">
+    <div class="row h-100 flex-grow-1">
       <!-- LEFT -->
       <div class="col-9 h-100">
         <div class="row h-100">
@@ -50,10 +50,10 @@
             <div class="row h-100">
               <!-- AI BLOCK -->
               <div class="col-6 flex-grow-1">
-                <div class="ai-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+                <div class="ai-wrapper w-100 h-100 rounded-5 position-relative bg-white">
                   <!-- Question Display -->
                   <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5">
-                    <small class="blur-bg p-2">Q.{{ currentIndex + 1 }} / {{ questions.length }}</small>
+                    <small class="blur-bg p-2">Q.{{ currentIndex + 1 }}</small>
                     {{ questions[currentIndex]?.question }}
                   </div>
                 </div>
@@ -61,7 +61,7 @@
 
               <!-- USER BLOCK -->
               <div class="col-6 flex-grow-1">
-                <div class="user-wrapper w-100 h-100 rounded-3 position-relative bg-white">
+                <div class="user-wrapper w-100 h-100 rounded-5 position-relative bg-white">
                   <!-- Answer Textarea (Live Speech Display) -->
                   <textarea #typedAnswer [(ngModel)]="finalTranscript" class="d-none"></textarea> 
                   
@@ -77,30 +77,49 @@
                     </div>
                   }
                   <!-- Camera Preview -->
-                  <video #video autoplay playsinline muted style="width:100%;height: 100%;" class="rounded-3"></video>
+                  <video #video autoplay playsinline muted style="width:100%;height: 100%;" class="rounded-5"></video>
                 </div>
               </div>
             </div>
           </div>
 
-          <footer class="col-12 d-flex align-items-center justify-content-center gap-3">
+          <footer class="col-12 d-flex align-items-center justify-content-between gap-3">
+            <div>
+              <small class="blur-bg rounded-5 px-2 py-1 me-2 text-white">Questions: {{ currentIndex + 1 }} / {{ questions.length }}</small>
               @if (recording) {
-                <span class="inline-block text-white px-3 py-1 bg-success">🎙️ Listening... Please speak your answer</span>
+                <small class="inline-block text-white px-2 py-1 rounded-5 bg-success">🎙️ Listening... Please speak your answer</small>
               } @else {
-                <span class="inline-block px-3 py-1 bg-secondary text-white"> Waiting for next question... </span>
+                <small class="inline-block text-white px-2 py-1 rounded-5 bg-secondary">Waiting for next question...</small>
               }
-              <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Typed</button>
-              <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Spoken</button>
-              <button class="logout-btn" (click)="logout()">Logout</button>
-              @if (loadingSubmit){
-                <span>Submitting...</span>
-              }
+              <small class="blur-bg rounded-5 px-2 py-1 ms-2 text-white">⏳ Idle Time {{ timeLeft }}s</small>
+            </div>
+            <!-- <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Typed</button>
+            <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Spoken</button>
+            @if (loadingSubmit){
+              <span>Submitting...</span>
+            } -->
+            <button class="logout-btn" (click)="logout()">Logout</button>
           </footer>
 
         </div>
       </div>
       <!-- RIGHT -->
-      <div class="col-3">Right</div>
+      <div class="col-3 h-100">
+        <div class="card h-100 rounded-5">
+          <div class="card-body">
+            
+            <div class="summary-wrapper">
+              <h6>Summary</h6>
+              <ul class="list-unstyled">
+                @for (item of summary; track $index) {
+                  <li class="summary-qtn"><strong>Ai Interviewer:</strong> {{ item.qtn }}</li>
+                  <li class="summary-ans"><strong>Candidate:</strong> {{ item.ans }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
     </main>

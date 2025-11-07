@@ -10,6 +10,10 @@ interface Instruction {
   title: string;
   text: string;
 }
+interface Summary {
+  qtn: string;
+  ans: string;
+}
 
 @Component({
   selector: 'app-interview',
@@ -38,6 +42,17 @@ export class Interview implements OnInit {
   recognition: any;       // speech recognition instance
   isListening = false;
   speechTimer: any;
+
+  summary: Summary[] = [
+    {
+      qtn: 'Question 01 goes here',
+      ans: 'Answer 01 goes here'
+    },
+    {
+      qtn: 'Question 02 goes here',
+      ans: 'Answer 02 goes here'
+    },
+  ];
 
   instructions: Instruction[] = [
     {
@@ -80,7 +95,6 @@ export class Interview implements OnInit {
       title: 'Answer Capturing:',
       text: `Your answers will be recorded between the moment you click <span class="purple-text-color">"Start Answer"</span> and <span class="purple-text-color">"End Answer"</span>.`
     }
-
   ];
 
   constructor(
