@@ -33,7 +33,7 @@ export class Interview implements OnInit {
   user_info: any = {};
   status: string = 'active';
   statusMessage: string = '';
-  timeLeft = 20;
+  //timeLeft = 20;
   timerInterval: any;
   recognition: any;       // speech recognition instance
   isListening = false;
@@ -147,8 +147,14 @@ startFrameAnalysis() {
           if (this.status === 'paused') {
             this.stopCamera();
             alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
-          } else if (this.status === 'idle') {
-            this.playTTS('Are you still there? Please answer the question.');
+          } 
+          else if (this.status === 'idle') {
+            this.playTTS('Are you still there? Please continue speaking.');
+          } 
+          else if (this.status === 'idle_for_submission') {
+            // 🚀 Auto submit current answer and go to next question
+            this.playTTS('You seem idle. Moving to the next question.');
+            this.autoSubmitAnswer();
           }
         },
         error: (err) => {
@@ -173,17 +179,17 @@ startFrameAnalysis() {
 }
 
   /** ⏱️ Start 20-second timer per question */
-  startQuestionTimer() {
-    clearInterval(this.timerInterval);
-    this.timeLeft = 20;
-    this.timerInterval = setInterval(() => {
-      this.timeLeft--;
-      if (this.timeLeft <= 0) {
-        clearInterval(this.timerInterval);
-        this.autoSubmitAnswer();
-      }
-    }, 1000);
-  }
+  // startQuestionTimer() {
+  //   clearInterval(this.timerInterval);
+  //   this.timeLeft = 20;
+  //   this.timerInterval = setInterval(() => {
+  //     this.timeLeft--;
+  //     if (this.timeLeft <= 0) {
+  //       clearInterval(this.timerInterval);
+  //       this.autoSubmitAnswer();
+  //     }
+  //   }, 1000);
+  // }
 
   /** 🤖 Auto-submit when time expires or user stops speaking */
   autoSubmitAnswer() {
@@ -212,7 +218,7 @@ submitAnswer(answer: string) {
 
   this.svc.submitAnswer(formData).subscribe({
     next: (response: any) => {
-      console.log('✅ Answer submitted successfully:', response);
+      //console.log('✅ Answer submitted successfully:', response);
       this.loadingSubmit = false;
       this.getCandidateSummary();
       this.nextQuestion();
@@ -230,7 +236,7 @@ submitAnswer(answer: string) {
     this.currentIndex++;
     this.finalTranscript = '';
     this.interimTranscript = '';
-    this.startQuestionTimer();
+    //this.startQuestionTimer();
     this.playTTS(this.questions[this.currentIndex].question);
 
     // restart listening
@@ -294,7 +300,7 @@ generateQuestions() {
       this.initSpeechRecognition();
       this.startListening(); // Start capturing candidate's speech
       this.playTTS(this.questions[0].question);
-      this.startQuestionTimer();
+      //this.startQuestionTimer();
       this.getCandidateSummary();
     },
     error: (err) => {
@@ -352,7 +358,7 @@ initSpeechRecognition() {
 
     // Auto-submit after user stops speaking for a few seconds
     if (this.finalTranscript.trim().length > 0) {
-      console.log('Auto submitting answer:', this.finalTranscript);
+      //console.log('Auto submitting answer:', this.finalTranscript);
       this.autoSubmitAnswer();
     }
   };
@@ -385,7 +391,7 @@ getCandidateSummary() {
   this.svc.getSummary(formData).subscribe({
     next: (response: any) => {
       this.summary = response.answers;
-      console.log(this.summary);
+      //console.log(this.summary);
     },
     error: (err) => {
       console.error('❌ Error submitting answer:', err);
