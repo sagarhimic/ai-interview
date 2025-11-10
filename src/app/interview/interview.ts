@@ -117,17 +117,29 @@ export class Interview implements OnInit {
     }
   }
 
-  /** 🎥 Continuously send frames to FastAPI for analysis */
+/** 🎥 Continuously analyze frames & draw bounding boxes */
 startFrameAnalysis() {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d')!;
   const video = this.video.nativeElement;
+
+  // Create overlay canvas (for green face rectangles)
+  const overlayCanvas = document.createElement('canvas');
+  const overlayCtx = overlayCanvas.getContext('2d')!;
+  overlayCanvas.style.position = 'absolute';
+  overlayCanvas.style.top = '0';
+  overlayCanvas.style.left = '0';
+  overlayCanvas.style.zIndex = '2';
+  video.parentElement?.appendChild(overlayCanvas);
 
   setInterval(() => {
     if (!video.videoWidth || !video.videoHeight) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    overlayCanvas.width = video.videoWidth;
+    overlayCanvas.height = video.videoHeight;
+
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     canvas.toBlob((blob) => {
@@ -135,7 +147,6 @@ startFrameAnalysis() {
 
       const formData = new FormData();
       const candidateID = this._token.getUserData();
-
       formData.append('candidate_id', candidateID.data.candidate_id);
       formData.append('frame', blob, 'frame.jpg');
 
@@ -144,15 +155,27 @@ startFrameAnalysis() {
           this.status = response.status || 'active';
           this.statusMessage = response.reason || '';
 
+          /** 🟩 Draw face boxes if available */
+          overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+          if (response.face_boxes && response.face_boxes.length) {
+            overlayCtx.lineWidth = 2;
+            overlayCtx.strokeStyle = 'lime';
+            overlayCtx.font = '14px Arial';
+            overlayCtx.fillStyle = 'lime';
+
+            response.face_boxes.forEach((box: any) => {
+              overlayCtx.strokeRect(box.x, box.y, box.w, box.h);
+              overlayCtx.fillText('Face', box.x, box.y - 5);
+            });
+          }
+
+          /** 🔁 Handle statuses */
           if (this.status === 'paused') {
             this.stopCamera();
             alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
-          } 
-          else if (this.status === 'idle') {
+          } else if (this.status === 'idle') {
             this.playTTS('Are you still there? Please continue speaking.');
-          } 
-          else if (this.status === 'idle_for_submission') {
-            // 🚀 Auto submit current answer and go to next question
+          } else if (this.status === 'idle_for_submission') {
             this.playTTS('You seem idle. Moving to the next question.');
             this.autoSubmitAnswer();
           }
