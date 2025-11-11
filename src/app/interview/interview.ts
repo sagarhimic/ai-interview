@@ -343,7 +343,8 @@ submitAnswer(answer: string) {
       //console.log('✅ Answer submitted successfully:', response);
       this.loadingSubmit = false;
       this.getCandidateSummary();
-      this.nextQuestion();
+      // this.nextQuestion();
+      this.nextQuestion(response);
     },
     error: (err) => {
       console.error('❌ Error submitting answer:', err);
@@ -353,24 +354,72 @@ submitAnswer(answer: string) {
 }
 
   /** 🎯 Move to next question */
-  nextQuestion() {
+//   nextQuestion() {
+//   if (this.currentIndex + 1 < this.questions.length) {
+//     this.currentIndex++;
+//     this.finalTranscript = '';
+//     this.interimTranscript = '';
+//     //this.startQuestionTimer();
+//     this.playTTS(this.questions[this.currentIndex].question);
+
+//     // restart listening
+//     this.stopListening();
+//     setTimeout(() => this.startListening(), 1000); // small delay after question TTS
+//   } else {
+//     this.stopListening();
+//     this.stopCamera();
+//     this.playTTS('Thank you! The interview is now complete.');
+//     alert('Interview finished');
+//   }
+// }
+
+/** 🎯 Move to next question */
+nextQuestion(responseFromBackend?: any) {
+  // 🧩 Check if backend indicated a skipped question or follow-up
+  if (responseFromBackend?.status === 'skipped' && responseFromBackend?.next_question) {
+    // Dynamically add the follow-up question to the question list
+    const followup = {
+      id: `${this.questions[this.currentIndex].id}_followup`,
+      question: responseFromBackend.next_question
+    };
+    this.questions.push(followup);
+    this.currentIndex = this.questions.length - 1;
+
+    // Reset transcripts
+    this.finalTranscript = '';
+    this.interimTranscript = '';
+
+    // 🎤 Ask follow-up question
+    this.playTTS(followup.question);
+
+    // Restart listening after short delay
+    this.stopListening();
+    setTimeout(() => this.startListening(), 800);
+    return; // ⛔ Stop here (don’t advance to normal next question)
+  }
+
+  // ✅ Regular next-question logic
   if (this.currentIndex + 1 < this.questions.length) {
     this.currentIndex++;
     this.finalTranscript = '';
     this.interimTranscript = '';
-    //this.startQuestionTimer();
+
+    // Ask next question normally
     this.playTTS(this.questions[this.currentIndex].question);
 
-    // restart listening
+    // Restart listening
     this.stopListening();
-    setTimeout(() => this.startListening(), 1000); // small delay after question TTS
+    setTimeout(() => this.startListening(), 800);
   } else {
+    // 🎬 End of interview
     this.stopListening();
     this.stopCamera();
+    this.stopRecording();
     this.playTTS('Thank you! The interview is now complete.');
     alert('Interview finished');
   }
 }
+
 
   /** 🔊 Play interviewer voice using Web Speech API (no backend) */
 playTTS(text: string) {
