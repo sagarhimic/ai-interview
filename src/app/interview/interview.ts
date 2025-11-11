@@ -39,12 +39,17 @@ export class Interview implements OnInit, OnDestroy {
   speechTimer: any;
   summary: any = [];
 
+<<<<<<< HEAD
   /** 🎥 Video recording state */
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: BlobPart[] = [];
   private recordingMime = 'video/webm';
   public recordingStarted = false;
+=======
+  cameraAllowed = false;
+  micAllowed = false;
+>>>>>>> 173c8b8a879614e0cad087704ab3e23b40e35b0f
 
   instructions: Instruction[] = [
     {
@@ -98,6 +103,9 @@ export class Interview implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+
+    this.checkPermissions();
+
     this.user_info = this._token.getUserData();
     this.setupForm = this.fb.group({
       job_title: [this.user_info?.data?.job_title],
@@ -112,7 +120,24 @@ export class Interview implements OnInit, OnDestroy {
     });
   }
 
+<<<<<<< HEAD
  /** 🚀 Start camera and recording automatically */
+=======
+  checkPermissions() {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        this.cameraAllowed = true;
+        this.micAllowed = true;
+        stream.getTracks().forEach(track => track.stop()); // stop webcam access
+      })
+      .catch(err => {
+        this.cameraAllowed = false;
+        this.micAllowed = false;
+      });
+  }
+
+ /** 🎥 Start camera & interview */
+>>>>>>> 173c8b8a879614e0cad087704ab3e23b40e35b0f
   async startCamera() {
   try {
     this.mediaStream = await navigator.mediaDevices.getUserMedia({
