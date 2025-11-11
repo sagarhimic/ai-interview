@@ -1,4 +1,4 @@
-import { Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Interviews } from '../core/_services/Interviews';
@@ -18,7 +18,7 @@ interface Instruction {
   templateUrl: './interview.html',
   styleUrl: './interview.scss',
 })
-export class Interview implements OnInit {
+export class Interview implements OnInit, OnDestroy {
   @ViewChild('video', { static: false }) video!: ElementRef<HTMLVideoElement>;
   @ViewChild('typedAnswer', { static: false }) typedAnswer!: ElementRef<HTMLTextAreaElement>;
 
@@ -33,12 +33,18 @@ export class Interview implements OnInit {
   user_info: any = {};
   status: string = 'active';
   statusMessage: string = '';
-  //timeLeft = 20;
   timerInterval: any;
   recognition: any;       // speech recognition instance
   isListening = false;
   speechTimer: any;
   summary: any = [];
+
+  /** 🎥 Video recording state */
+  private mediaStream: MediaStream | null = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private recordedChunks: BlobPart[] = [];
+  private recordingMime = 'video/webm';
+  public recordingStarted = false;
 
   instructions: Instruction[] = [
     {
@@ -106,16 +112,104 @@ export class Interview implements OnInit {
     });
   }
 
- /** 🎥 Start camera & interview */
+ /** 🚀 Start camera and recording automatically */
   async startCamera() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      this.video.nativeElement.srcObject = stream;
-      this.startFrameAnalysis(); // begin sending frames
-    } catch (err) {
-      console.error('Camera error:', err);
+  try {
+    this.mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+    const videoEl = this.video.nativeElement;
+    videoEl.srcObject = this.mediaStream;
+    videoEl.muted = true; // ✅ Prevent echo from preview
+    await videoEl.play();
+
+    this.startRecording();
+    this.startFrameAnalysis();
+  } catch (err) {
+    console.error('Camera error:', err);
+    alert('Camera permission denied or unavailable.');
+  }
+}
+
+  /** 🎥 Start recording automatically */
+  startRecording() {
+    if (!this.mediaStream) return;
+
+    const supportedTypes = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=h264,opus',
+      'video/webm'
+    ];
+    for (const type of supportedTypes) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        this.recordingMime = type;
+        break;
+      }
+    }
+
+    this.recordedChunks = [];
+    this.mediaRecorder = new MediaRecorder(this.mediaStream, {
+      mimeType: this.recordingMime,
+      videoBitsPerSecond: 2500000
+    });
+
+    this.mediaRecorder.ondataavailable = (e: BlobEvent) => {
+      if (e.data && e.data.size > 0) this.recordedChunks.push(e.data);
+    };
+
+    this.mediaRecorder.onstop = async () => {
+      const blob = new Blob(this.recordedChunks, { type: this.recordingMime });
+      console.log('🎬 Recording complete, uploading...');
+      await this.uploadFullVideo(blob);
+    };
+
+    this.mediaRecorder.onerror = (err) => console.error('Recorder error:', err);
+    this.mediaRecorder.start(2000);
+    this.recordingStarted = true;
+    console.log('🎥 Interview recording started automatically');
+  }
+
+  /** 🛑 Stop recording when interview ends */
+  stopRecording() {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      console.log('🛑 Stopping video recording...');
+      this.mediaRecorder.stop();
     }
   }
+
+  /** ⬆️ Upload recorded video to backend */
+uploadFullVideo(blob: Blob) {
+  const candidate = this._token.getUserData();
+  const candidateId = candidate?.data?.candidate_id || 'unknown';
+
+  const formData = new FormData();
+  formData.append('candidate_id', candidateId);
+  formData.append('video_file', blob, `interview_${candidateId}_${Date.now()}.webm`);
+
+  console.log('📤 Uploading full interview video...');
+
+  this.svc.uploadFullVideo(formData).subscribe({
+    next: (response: any) => {
+      console.log('✅ Video uploaded successfully:', response);
+      this.loadingSubmit = false;
+    },
+    error: (err) => {
+      console.error('❌ Error uploading video:', err);
+      this.loadingSubmit = false;
+      alert('Video upload failed — please check your connection or retry.');
+    },
+    complete: () => {
+      console.log('🎬 Video upload complete.');
+    }
+  });
+}
 
 /** 🎥 Continuously analyze frames & draw bounding boxes */
 startFrameAnalysis() {
@@ -201,18 +295,12 @@ startFrameAnalysis() {
   }
 }
 
-  /** ⏱️ Start 20-second timer per question */
-  // startQuestionTimer() {
-  //   clearInterval(this.timerInterval);
-  //   this.timeLeft = 20;
-  //   this.timerInterval = setInterval(() => {
-  //     this.timeLeft--;
-  //     if (this.timeLeft <= 0) {
-  //       clearInterval(this.timerInterval);
-  //       this.autoSubmitAnswer();
-  //     }
-  //   }, 1000);
-  // }
+/** ✅ Cleanup when component unloads */
+  ngOnDestroy() {
+    console.log('🧹 Cleaning up resources...');
+    this.stopRecording();
+    this.stopCamera();
+  }
 
   /** 🤖 Auto-submit when time expires or user stops speaking */
   autoSubmitAnswer() {
@@ -346,6 +434,7 @@ initSpeechRecognition() {
   this.recognition.continuous = true;
   this.recognition.interimResults = true;
   this.recognition.lang = 'en-US';
+  this.recognition.maxAlternatives = 3;
 
   this.recognition.onstart = () => {
     console.log('🎙️ Listening...');
