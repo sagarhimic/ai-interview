@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Interviews } from '../core/_services/Interviews';
 import { Token } from '../core/_services/token';
 import { HttpClient } from '@angular/common/http';
+import { AvatarViewer } from '../components/avatar-viewer/avatar-viewer';
 
 interface Instruction {
   img: string;
@@ -14,7 +15,7 @@ interface Instruction {
 @Component({
   selector: 'app-interview',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, AvatarViewer],
   templateUrl: './interview.html',
   styleUrl: './interview.scss',
 })
