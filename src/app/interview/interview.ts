@@ -40,6 +40,9 @@ export class Interview implements OnInit {
   speechTimer: any;
   summary: any = [];
 
+  cameraAllowed = false;
+  micAllowed = false;
+
   instructions: Instruction[] = [
     {
       img: '/img/web-security.png',
@@ -92,6 +95,9 @@ export class Interview implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    this.checkPermissions();
+
     this.user_info = this._token.getUserData();
     this.setupForm = this.fb.group({
       job_title: [this.user_info?.data?.job_title],
@@ -104,6 +110,19 @@ export class Interview implements OnInit {
       required_skills: [this.user_info?.data?.required_skills, [Validators.required]],
       candidate_skills: [this.user_info?.data?.candidate_skills, [Validators.required]],
     });
+  }
+
+  checkPermissions() {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        this.cameraAllowed = true;
+        this.micAllowed = true;
+        stream.getTracks().forEach(track => track.stop()); // stop webcam access
+      })
+      .catch(err => {
+        this.cameraAllowed = false;
+        this.micAllowed = false;
+      });
   }
 
  /** 🎥 Start camera & interview */
