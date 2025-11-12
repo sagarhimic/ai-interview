@@ -264,3 +264,32 @@ backdrop-filter: blur(11px);
 
 
 .ai-wrapper{background: url(../../../public/img/room-bg.jpeg);background-position: center center;background-size: cover;}
+
+
+.qtn-ans-wrapper {
+
+  .animated-question {
+    word-wrap: break-word;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 1px;
+    height: 0.875rem;
+    background: #fff;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+    box-shadow: none;
+    outline: none;
+  }
+
+  @keyframes blink {
+    0%, 50% {
+      opacity: 1;
+    }
+    51%, 100% {
+      opacity: 0;
+    }
+  }
+}

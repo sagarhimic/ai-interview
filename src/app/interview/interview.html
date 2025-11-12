@@ -55,11 +55,17 @@
               <div class="col-7 flex-grow-1">
                 <div class="ai-wrapper w-100 h-100 rounded-5 position-relative bg-white overflow-hidden">
                   <!-- AI AVATAR -->
-                  <app-avatar-viewer class="d-flex w-100 h-100" style="background:rgba(255, 255, 255, 0.25)"></app-avatar-viewer>
+                  <app-avatar-viewer class="d-flex w-100 h-100" style="background:rgba(255, 255, 255, 0.25)" #avatar></app-avatar-viewer>
                   <!-- Question Display -->
-                  <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5">
+                  <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5 d-flex align-items-center justify-content-center">
                     <small class="blur-bg p-2">Q.{{ currentIndex + 1 }}</small>
                     {{ questions[currentIndex]?.question }}
+                    <!-- <div class="animated-question">
+                      {{ displayedQuestion }}
+                      @if (displayedQuestion.length < (questions[currentIndex]?.question?.length || 0)){
+                        <span class="cursor-blink">|</span>
+                      }
+                    </div> -->
                   </div>
                 </div>
               </div>
@@ -82,7 +88,7 @@
                     </div>
                   }
                   <!-- Camera Preview -->
-                  <div class="user-video-container ratio ratio-1x1">
+                  <div class="user-video-container w-100 h-100">
                     <video #video autoplay playsinline muted></video>
                   </div>
                 </div>
@@ -100,11 +106,6 @@
               }
               <!-- <small class="blur-bg rounded-5 px-2 py-1 ms-2 text-white">⏳ Idle Time {{ timeLeft }}s</small> -->
             </div>
-            <!-- <button (click)="submitAnswer(typedAnswer.value)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Typed</button>
-            <button (click)="submitAnswer(finalTranscript)" [disabled]="loadingSubmit" class="btn btn-secondary">Submit Spoken</button>
-            @if (loadingSubmit){
-              <span>Submitting...</span>
-            } -->
             <button class="logout-btn" (click)="logout()">Logout</button>
           </footer>
 
