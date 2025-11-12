@@ -231,7 +231,8 @@ textarea {
 header,footer{height: 80px;}
 .ai-user-wrapper{height: calc(100% - 160px);}
 
-.qtn-ans-wrapper{width: 80%;bottom:20px;font-size: 0.938rem;  font-weight: 300;  padding: 8px 15px;z-index: 2;}
+.qtn-ans-wrapper{width: 80%;bottom:30px;transform: translate(-50%, -0%) !important;
+ font-size: 0.938rem;  font-weight: 300;  padding: 8px 15px;z-index: 2;}
 
 
 footer{font-size: 0.875rem;}

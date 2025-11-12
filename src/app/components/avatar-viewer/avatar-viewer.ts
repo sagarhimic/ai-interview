@@ -321,6 +321,122 @@ export class AvatarViewer implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+
+  /* ----------------------------
+   LIPSYNC CONTROL (public)
+   ---------------------------- */
+  private lipInterval?: number;
+
+  /**
+   * Called when TTS / audio starts playing.
+   * Starts a lightweight simulated lip-sync loop using morph targets.
+   */
+  public startSpeaking() {
+    // stop if already speaking
+    if (this.lipInterval) window.clearInterval(this.lipInterval);
+
+    this.isSpeaking = true;
+    // quick randomised lip movement that looks plausible
+    this.lipInterval = window.setInterval(() => {
+      // small randomized intensities to make mouth move naturally
+      const base = 0.1 + Math.random() * 0.2; // 0.2..0.8
+      this.setMorph('jawOpen', base);
+      this.setMorph('viseme_aa', base * (0.2 + Math.random() * 0.1));
+      this.setMorph('viseme_O', base * (0.2 + Math.random() * 0.1));
+      this.setMorph('viseme_I', base * (0.2 + Math.random() * 0.1));
+      // optional: subtle smile while talking
+      this.setMorph('mouthSmileLeft', 0.1 + Math.random() * 0.2);
+      this.setMorph('mouthSmileRight', 0.1 + Math.random() * 0.2);
+
+      // request immediate render so changes are visible even if render loop is low
+      this.renderer.render(this.scene, this.camera);
+    }, 100 /*ms update*/);
+  }
+
+  /** Stop lip sync and reset mouth morphs */
+  public stopSpeaking() {
+    if (this.lipInterval) {
+      window.clearInterval(this.lipInterval);
+      this.lipInterval = undefined;
+    }
+    this.isSpeaking = false;
+
+    // smoothly reset main mouth morphs
+    this.setMorph('jawOpen', 0);
+    this.setMorph('viseme_aa', 0);
+    this.setMorph('viseme_O', 0);
+    this.setMorph('viseme_I', 0);
+    // keep slight smile
+    this.setMorph('mouthSmileLeft', 0.25);
+    this.setMorph('mouthSmileRight', 0.25);
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
+
+  /**
+ * Called by Interview whenever face boxes are received.
+ * faceBox: { x, y, w, h } in video pixel coords
+ * videoSize: { w, h }
+ */
+  public lookAtFace(faceBox: { x: number; y: number; w: number; h: number }, videoSize: { w: number; h: number }) {
+    if (!this.headBone) return;
+
+    // find face center
+    const cx = faceBox.x + faceBox.w / 2;
+    const cy = faceBox.y + faceBox.h / 2;
+
+    // normalize -1..1 (video coord origin top-left)
+    const nx = (cx / videoSize.w) * 2 - 1;   // -1 left, +1 right
+    const ny = (cy / videoSize.h) * 2 - 1;   // -1 top, +1 bottom
+
+    // map to small head rotations (clamped)
+    const maxYaw = 0.25;   // radians (~14deg)
+    const maxPitch = 0.15; // radians (~8deg)
+
+    // invert Y because screen top is -1 but head pitch positive should look down
+    const targetYaw = THREE.MathUtils.clamp(-nx * maxYaw, -maxYaw, maxYaw);
+    const targetPitch = THREE.MathUtils.clamp(ny * maxPitch, -maxPitch, maxPitch);
+
+    // smooth the head motion for naturalness
+    gsap.to(this.headBone!.rotation, {
+      x: targetPitch,
+      y: targetYaw * 0.3, // small chest twist
+      duration: 0.12,
+      ease: 'sine.out'
+    });
+
+    // Eyes: use morph targets if available (eyesLook* or eyeLookIn/Out)
+    // Choose appropriate morph names present in your GLB:
+    // eyesLookLeft/Right or eyeLookInLeft/Right etc.
+    // We'll map normalized coords to these morphs.
+
+    // Horizontal eye control
+    const lookLR = THREE.MathUtils.clamp(nx * 0.8, -1, 1); // -1 left, +1 right
+    // Vertical eye control (invert)
+    const lookUD = THREE.MathUtils.clamp(-ny * 0.8, -1, 1); // -1 up, +1 down
+
+    // set common morphs if present
+    // horizontal: eyeLookIn/Out or eyesLookLeft/Right
+    const setIfPresent = (name: string, value: number) => {
+      for (const m of this.morphMeshes) {
+        const dict = m.morphTargetDictionary;
+        const infl = m.morphTargetInfluences!;
+        if (dict && name in dict) infl[dict[name]] = value;
+      }
+    };
+
+    // horizontal mapping
+    setIfPresent('eyesLookLeft', lookLR < 0 ? Math.abs(lookLR) : 0);
+    setIfPresent('eyesLookRight', lookLR > 0 ? Math.abs(lookLR) : 0);
+
+    // vertical mapping
+    setIfPresent('eyesLookUp', lookUD < 0 ? Math.abs(lookUD) : 0);
+    setIfPresent('eyesLookDown', lookUD > 0 ? Math.abs(lookUD) : 0);
+  }
+
+
+
   /* ------------------------------------------------------------------ */
   /* 📐 RESIZE HANDLER                                                 */
   /* ------------------------------------------------------------------ */

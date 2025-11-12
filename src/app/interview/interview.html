@@ -57,7 +57,7 @@
                   <!-- AI AVATAR -->
                   <app-avatar-viewer class="d-flex w-100 h-100" style="background:rgba(255, 255, 255, 0.25)" #avatar></app-avatar-viewer>
                   <!-- Question Display -->
-                  <div class="position-absolute translate-middle start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5 d-flex align-items-center justify-content-center">
+                  <div class="position-absolute start-50 qtn-ans-wrapper blur-bg text-white text-center rounded-5 d-flex align-items-center justify-content-center">
                     <small class="blur-bg p-2">Q.{{ currentIndex + 1 }}</small>
                     {{ questions[currentIndex]?.question }}
                     <!-- <div class="animated-question">
@@ -88,7 +88,7 @@
                     </div>
                   }
                   <!-- Camera Preview -->
-                  <div class="user-video-container w-100 h-100">
+                  <div class="user-video-container w-100 h-100 ratio ratios-1x1">
                     <video #video autoplay playsinline muted></video>
                   </div>
                 </div>
