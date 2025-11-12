@@ -432,6 +432,7 @@ nextQuestion(responseFromBackend?: any) {
     this.stopRecording();
     this.playTTS('Thank you! The interview is now complete.');
     alert('Interview finished');
+    this.logout();
   }
 }
 
