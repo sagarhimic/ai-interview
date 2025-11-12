@@ -22,7 +22,7 @@ interface Instruction {
 export class Interview implements OnInit, OnDestroy {
   @ViewChild('video', { static: false }) video!: ElementRef<HTMLVideoElement>;
   @ViewChild('typedAnswer', { static: false }) typedAnswer!: ElementRef<HTMLTextAreaElement>;
-
+  @ViewChild("avatar", { static: false }) avatar!: AvatarViewer;
   setupForm!: FormGroup;
   questions: any[] = [];
   currentIndex = 0;
@@ -39,7 +39,7 @@ export class Interview implements OnInit, OnDestroy {
   isListening = false;
   speechTimer: any;
   summary: any = [];
-
+  displayedQuestion: string = ''; // visible typed question text
   /** 🎥 Video recording state */
   private mediaStream: MediaStream | null = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -274,6 +274,14 @@ startFrameAnalysis() {
             });
           }
 
+          // call avatar to look at candidate
+          // if (response.face_boxes && response.face_boxes.length && this.avatar) {
+          //   // pick the largest/first box
+          //   const box = response.face_boxes[0];
+          //   const videoEl = this.video.nativeElement;
+          //   this.avatar.lookAtFace({ x: box.x, y: box.y, w: box.w, h: box.h }, { w: videoEl.videoWidth || videoEl.clientWidth, h: videoEl.videoHeight || videoEl.clientHeight });
+          // }
+
           /** 🔁 Handle statuses */
           if (this.status === 'paused') {
             this.stopCamera();
@@ -456,19 +464,49 @@ playTTS(text: string) {
     // 🟣 Track TTS activity
     this.isTTSPlaying = true;
 
-    utterance.onstart = () => {
-      console.log('🗣️ TTS started speaking.');
-      this.stopListening(); // pause recognition while TTS speaks
-    };
+    // utterance.onstart = () => {
+    //   console.log('🗣️ TTS started speaking.');
+    //   this.stopListening(); // pause recognition while TTS speaks
+    // };
 
+    // utterance.onend = () => {
+    //   console.log('✅ TTS finished speaking.');
+    //   // Wait a bit to avoid capturing TTS echo tail
+    //   setTimeout(() => {
+    //     this.isTTSPlaying = false;
+    //     console.log('🎤 Restarting recognition after TTS...');
+    //     this.safeRestartRecognition(); // safely resume mic
+    //   }, 350);
+    // };
+
+    utterance.onstart = () => {
+      console.log('🔊 Speaking:', text);
+      if (this.isListening) this.stopListening();
+ 
+      // tell avatar to animate thinking -> speaking
+      if (this.avatar) {
+        try {
+          this.avatar.applyExpression('thinking'); // facial expression
+          this.avatar.startSpeaking();             // start lip-sync
+        } catch (e) { console.warn('avatar startSpeaking failed', e); }
+      }
+    };
+ 
     utterance.onend = () => {
-      console.log('✅ TTS finished speaking.');
-      // Wait a bit to avoid capturing TTS echo tail
-      setTimeout(() => {
-        this.isTTSPlaying = false;
-        console.log('🎤 Restarting recognition after TTS...');
-        this.safeRestartRecognition(); // safely resume mic
-      }, 350);
+      console.log('✅ Done speaking');
+      this.displayedQuestion = text; // ensure full question visible
+      if (this.avatar) {
+        try {
+          this.avatar.stopSpeaking();
+          this.avatar.applyExpression('happy');
+          setTimeout(() => {
+          this.isTTSPlaying = false;
+          console.log('🎤 Restarting recognition after TTS...');
+          this.safeRestartRecognition(); // safely resume mic
+          }, 350);
+        } catch (e) { console.warn('avatar stopSpeaking failed', e); }
+      }
+      setTimeout(() => this.startListening(), 800);
     };
 
     utterance.onerror = (e) => {
