@@ -30,6 +30,7 @@ export class Token {
 
   // ✅ Logout user
   logout(): void {
+    localStorage.clear();
     localStorage.removeItem('access_token');
     this.router.navigate(['/']);
   }
