@@ -281,8 +281,14 @@ startFrameAnalysis() {
           } else if (this.status === 'idle') {
             this.playTTS('Are you still there? Please continue speaking.');
           } else if (this.status === 'idle_for_submission') {
-            this.playTTS('You seem idle. Moving to the next question.');
-            this.autoSubmitAnswer();
+            console.log('🤖 User idle for long time, auto submitting current answer...');
+            // Only auto-submit if not already recording speech
+            if (!this.isListening) {
+              this.playTTS('You seem idle. Moving to the next question.');
+              this.autoSubmitAnswer();
+            } else {
+              console.log('🎤 Still listening, not submitting yet.');
+            }
           }
         },
         error: (err) => {
@@ -331,6 +337,7 @@ submitAnswer(answer: string) {
   const candidateID = this._token.getUserData();
 
   formData.append('candidate_id', candidateID.data.candidate_id);
+  formData.append('meeting_id', candidateID.data.meeting_id);
   formData.append('question_id', currentQ.id);
   formData.append('answer_text', answer);
   formData.append('candidate_skills', candidateID.data.candidate_skills);
@@ -379,7 +386,7 @@ nextQuestion(responseFromBackend?: any) {
   if (responseFromBackend?.status === 'skipped' && responseFromBackend?.next_question) {
     // Dynamically add the follow-up question to the question list
     const followup = {
-      id: `${this.questions[this.currentIndex].id}_followup`,
+      id: `${this.questions[this.currentIndex].id}`,
       question: responseFromBackend.next_question
     };
     this.questions.push(followup);
@@ -420,22 +427,24 @@ nextQuestion(responseFromBackend?: any) {
   }
 }
 
-
   /** 🔊 Play interviewer voice using Web Speech API (no backend) */
 playTTS(text: string) {
-    if (!('speechSynthesis' in window)) {
-      console.warn('Speech synthesis not supported in this browser.');
-      return;
-    }
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+  if (!('speechSynthesis' in window)) {
+    console.warn('Speech synthesis not supported in this browser.');
+    return;
+  }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.pitch = 1;
-    utterance.rate = 1;
-    utterance.volume = 1;
+  // 🔇 Stop any currently speaking TTS before starting new one
+  window.speechSynthesis.cancel();
 
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.pitch = 1;
+  utterance.rate = 1;
+  utterance.volume = 1;
+
+  // ✅ Handle voice loading asynchronously (fixes empty voices[] in Chrome)
+  const assignVoiceAndSpeak = () => {
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(v =>
       v.name.includes('Google US English Female') ||
@@ -444,18 +453,42 @@ playTTS(text: string) {
     );
     if (preferredVoice) utterance.voice = preferredVoice;
 
+    // 🟣 Track TTS activity
+    this.isTTSPlaying = true;
+
     utterance.onstart = () => {
-      // Pause recognition when TTS speaks
-      this.isTTSPlaying = true;
-      this.stopListening();
+      console.log('🗣️ TTS started speaking.');
+      this.stopListening(); // pause recognition while TTS speaks
     };
+
     utterance.onend = () => {
-      // resume recognition after a short delay to avoid picking up TTS tail
-      setTimeout(() => { this.isTTSPlaying = false; this.startListening(); }, 250);
+      console.log('✅ TTS finished speaking.');
+      // Wait a bit to avoid capturing TTS echo tail
+      setTimeout(() => {
+        this.isTTSPlaying = false;
+        console.log('🎤 Restarting recognition after TTS...');
+        this.safeRestartRecognition(); // safely resume mic
+      }, 350);
+    };
+
+    utterance.onerror = (e) => {
+      console.error('⚠️ TTS error:', e);
+      this.isTTSPlaying = false;
+      // Try restarting recognition even if TTS fails
+      this.safeRestartRecognition();
     };
 
     window.speechSynthesis.speak(utterance);
+  };
+
+  // 👂 Handle browsers where voices aren’t loaded yet
+  if (window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = assignVoiceAndSpeak;
+  } else {
+    assignVoiceAndSpeak();
   }
+}
+
 
   /** 🎤 Start AI Interview (after “Start Interview” button) */
 generateQuestions() {
@@ -557,15 +590,26 @@ generateQuestions() {
 
     // onend — called when recognition stops (Chrome sometimes ends automatically)
     this.recognition.onend = () => {
-      console.log('🎙️ Recognition ended');
-      this.isListening = false;
-      this.recording = false;
-      // If we ended because of TTS, do not auto-restart until TTS finished
-      if (!this.isTTSPlaying) {
-        // Try to restart automatically (some browsers end after ~60s)
-        this.safeRestartRecognition();
-      }
-    };
+    console.log('🛑 Speech recognition stopped.');
+    this.isListening = false;
+    this.recording = false;
+
+    // 🧠 Check if TTS (interviewer) is still talking
+    if (this.isTTSPlaying) {
+      console.log('🎧 Waiting for TTS to finish before restarting recognition...');
+      return; // don’t restart or submit yet
+    }
+
+    // 🎤 If user gave a valid answer (3+ chars), auto-submit
+    if (this.finalTranscript.trim().length > 3) {
+      console.log('✅ Candidate finished speaking — submitting answer.');
+      this.autoSubmitAnswer();
+    } else {
+      // 🕓 If silence or short phrase, try to restart listening automatically
+      console.log('🤖 Silence or incomplete input — restarting recognition...');
+      this.safeRestartRecognition();
+    }
+  };
   }
 
   /** start listening safely */
@@ -621,20 +665,23 @@ generateQuestions() {
 
   /** Try to restart recognition if it has ended — ensure only one restart at a time */
   private safeRestartRecognition() {
-    if (this.waitingToRestart) return;
-    this.waitingToRestart = true;
-    setTimeout(() => {
-      try {
-        if (!this.isTTSPlaying && this.recognition && !this.isListening) {
-          this.recognition.start();
-        }
-      } catch (e) {
-        console.warn('safeRestartRecognition failed', e);
-      } finally {
-        this.waitingToRestart = false;
+  if (this.waitingToRestart) return;
+  this.waitingToRestart = true;
+
+  setTimeout(() => {
+    try {
+      if (!this.isTTSPlaying && this.recognition && !this.isListening) {
+        console.log('🎙️ Restarting speech recognition safely...');
+        this.recognition.start();
       }
-    }, 500);
-  }
+    } catch (e) {
+      console.warn('⚠️ safeRestartRecognition failed:', e);
+    } finally {
+      this.waitingToRestart = false;
+    }
+  }, 800); // small delay prevents spam restarts
+}
+
 
   /* ---------- TTS integration: pause recognition during TTS ---------- */
 
@@ -644,14 +691,12 @@ getCandidateSummary() {
   const formData = new FormData();
   const candidateID = this._token.getUserData();
 
-  console.log(candidateID);
-
   formData.append('candidate_id', candidateID.data.candidate_id);
+  formData.append('meeting_id', candidateID.data.meeting_id);
 
   this.svc.getSummary(formData).subscribe({
     next: (response: any) => {
       this.summary = response.answers;
-      //console.log(this.summary);
     },
     error: (err) => {
       console.error('❌ Error submitting answer:', err);
