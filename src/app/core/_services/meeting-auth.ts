@@ -13,15 +13,21 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class Auth {
+export class MeetingAuth {
 
   private base = environment.apiBase;
- 
+
   constructor(private http: HttpClient) {}
 
   authentication(data : any): Observable<any> {
     httpOptions.params = {};
-    return this.http.post(`${this.base}/recruiter/login/`,data, httpOptions);
+    return this.http.post(`${this.base}/login/`,data, httpOptions);
   }
+
+  getUser(candidate_id : any): Observable<any> {
+    httpOptions.params = {};
+    return this.http.post(`${this.base}/candidate/{candidate_id}`, httpOptions);
+  }
+
   
 }

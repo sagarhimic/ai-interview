@@ -1,10 +1,10 @@
 import { Component, ElementRef, NgZone, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Interviews } from '../core/_services/Interviews';
-import { Token } from '../core/_services/token';
+import { Interviews } from '../../core/_services/Interviews';
+import { Token } from '../../core/_services/token';
 import { HttpClient } from '@angular/common/http';
-import { AvatarViewer } from '../components/avatar-viewer/avatar-viewer';
+import { AvatarViewer } from '../avatar-viewer/avatar-viewer';
 import { Modal } from 'bootstrap';
 
 interface Instruction {
@@ -256,6 +256,7 @@ startFrameAnalysis() {
       const formData = new FormData();
       const candidateID = this._meetToken.getUserData();
       formData.append('candidate_id', candidateID.data.candidate_id);
+      formData.append('meeting_id', candidateID.data.meeting_id);
       formData.append('frame', blob, 'frame.jpg');
 
       this.svc.dataFrameSet(formData).subscribe({

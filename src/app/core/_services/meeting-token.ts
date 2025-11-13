@@ -32,7 +32,7 @@ export class MeetingToken {
   logout(): void {
     localStorage.clear();
     localStorage.removeItem('access_token');
-    this.router.navigate(['/']);
+    this.router.navigate(['/meeting']);
   }
 
   public getUserData(): any | null {

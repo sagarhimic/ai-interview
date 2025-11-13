@@ -1,23 +1,19 @@
 import { Routes } from '@angular/router';
-import { Login } from './login/login';
-import { authGuard } from './guards/auth.guard';
-import { Interview } from './interview/interview';
-import { AvatarViewer } from './components/avatar-viewer/avatar-viewer';
-import { MeetingLogin } from './meeting-login/meeting-login';
+import { authGuard } from './core/guards/auth.guard';
+import { AvatarViewer } from './meeting/avatar-viewer/avatar-viewer';
+import { MeetingLogin } from './meeting/meeting-login/meeting-login';
+import { Dashboard } from './recruiter/dashboard/dashboard';
+import { Login } from './recruiter/login/login';
+import { Interview } from './meeting/interview/interview';
 
 export const routes: Routes = [
 
-    {   path: '', component: Login },
-    
+    // RECRUITER ROUTES
+    { path: '', component: Login },
+    { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
 
-    {   path: 'meeting', component: MeetingLogin },
-    {
-        path: 'interview',component: Interview,
-        canActivate: [authGuard] // ✅ Protect Dashboard
-    },
-
-    {
-        path: 'avatar',component: AvatarViewer,
-        canActivate: [authGuard] // ✅ Protect Dashboard
-    }
+    // MEETING ROUTES
+    { path: 'meeting', component: MeetingLogin },
+    { path: 'interview',component: Interview, canActivate: [authGuard] },
+    { path: 'avatar',component: AvatarViewer, canActivate: [authGuard] }
 ];

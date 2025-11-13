@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Auth } from '../core/_services/auth';
-import { MeetingToken } from '../core/_services/meeting-token';
+import { Auth } from '../../core/_services/auth';
+import { Token } from '../../core/_services/token';
 
 @Component({
-  selector: 'app-meeting-login',
+  selector: 'app-login',
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './meeting-login.html',
-  styleUrl: './meeting-login.scss',
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
 })
-export class MeetingLogin {
 
+export class Login {
+   
     loading = false;
     errorMessage = '';
     form  : any;
@@ -24,10 +25,10 @@ export class MeetingLogin {
       private http: HttpClient,
       private router: Router,
       private auth: Auth,
-      private _meetToken:MeetingToken
+      private _token:Token
     ) {
       this.form = this.fb.group({
-        meeting_id: ['', Validators.required],
+        employee_id: ['', Validators.required],
         password: ['', Validators.required],
       }); 
     }  
@@ -38,13 +39,13 @@ export class MeetingLogin {
 
     this.loading = true;
     const formData = new FormData();
-    formData.append('meeting_id', this.form.value.meeting_id!);
+    formData.append('employee_id', this.form.value.employee_id!);
     formData.append('password', this.form.value.password!);
 
     this.auth.authentication(formData).subscribe({
       next: (res) => {
-        this._meetToken.setToken(res.access_meetToken);
-        this._meetToken.setUserData(JSON.stringify(res));
+        this._token.setToken(res.access_token);
+        this._token.setUserData(JSON.stringify(res));
         alert('Login successful!');
         this.router.navigate(['/interview']); // or any route
       },
@@ -59,7 +60,7 @@ export class MeetingLogin {
     
     this.loading = true;
     
-    const user_info = this._meetToken.getUserData;
+    const user_info = this._token.getUserData;
     
     console.log(user_info);
   }
