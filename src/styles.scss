@@ -8,7 +8,10 @@
 .primary-text-color{color: var(--primary-text-color);}
 .secondary-text-color{color: var(--secondary-text-color);}
 
-.secondary-bg-color{background-color: var(--primary-color);}
+.text-green{color: #0CA678;}
+.text-danger2{color: #FA5252;}
+.text-purple{color: #605DFF;}
+
 
 .primary-bg-color{background-color: var(--primary-color);}
 
@@ -48,3 +51,7 @@ body{
 	-webkit-background-clip: text;
     background-clip: text;
 	-webkit-text-fill-color: transparent;}
+
+
+
+

@@ -5,6 +5,7 @@ import { Interviews } from '../core/_services/Interviews';
 import { Token } from '../core/_services/token';
 import { HttpClient } from '@angular/common/http';
 import { AvatarViewer } from '../components/avatar-viewer/avatar-viewer';
+import { Modal } from 'bootstrap';
 
 interface Instruction {
   img: string;
@@ -56,6 +57,9 @@ export class Interview implements OnInit, OnDestroy {
   private lastFinalTranscript = ''; // to avoid duplicate auto-submits
   private isTTSPlaying = false; // flag so recognition doesn't treat TTS as speech
   private waitingToRestart = false; // avoid concurrent restarts
+
+  countdown = 10;
+  countdownInterval: any;
 
   instructions: Instruction[] = [
     {
@@ -109,7 +113,6 @@ export class Interview implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-
     this.user_info = this._token.getUserData();
     this.setupForm = this.fb.group({
       job_title: [this.user_info?.data?.job_title],
@@ -285,7 +288,8 @@ startFrameAnalysis() {
           /** 🔁 Handle statuses */
           if (this.status === 'paused') {
             this.stopCamera();
-            alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
+            //alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
+            this.proxyDetectedModal();
           } else if (this.status === 'idle') {
             this.playTTS('Are you still there? Please continue speaking.');
           } else if (this.status === 'idle_for_submission') {
@@ -431,8 +435,9 @@ nextQuestion(responseFromBackend?: any) {
     this.stopCamera();
     this.stopRecording();
     this.playTTS('Thank you! The interview is now complete.');
-    alert('Interview finished');
-    this.logout();
+    //alert('Interview finished');
+    //this.logout();
+    this.showInterviewFinishedModal();
   }
 }
 
@@ -620,7 +625,7 @@ generateQuestions() {
         setTimeout(() => this.safeRestartRecognition(), 500);
       } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         // permission denied or blocked — inform user
-        alert('Microphone permission is blocked. Please enable microphone access.');
+        //alert('Microphone permission is blocked. Please enable microphone access.');
       } else {
         // generic recover
         setTimeout(() => this.safeRestartRecognition(), 800);
@@ -745,12 +750,84 @@ getCandidateSummary() {
 }
 
   logout() {
+    const modalBackdrop = document.querySelector('.modal-backdrop');
+    modalBackdrop?.remove();
+    
     this._token.logout();
   }
+
+
+  showInterviewFinishedModal() {
+  const modalEl = document.getElementById('successModal');
+  const modal = new Modal(modalEl!);
+  modal.show();
+
+  
+  // Reset countdown if modal is opened again
+  this.countdown = 10;
+
+  // Start countdown
+  this.countdownInterval = setInterval(() => {
+    this.countdown--;
+    if (this.countdown === 0) {
+      clearInterval(this.countdownInterval);
+      modal.hide();
+      this.logout(); // auto logout
+    }
+  }, 1000);
+
+}
+
+proxyDetectedModal(){
+  const modalEl = document.getElementById('proxyModal');
+  const modal = new Modal(modalEl!);
+  modal.show();
+
+  
+  // Reset countdown if modal is opened again
+  this.countdown = 10;
+
+  // Start countdown
+  this.countdownInterval = setInterval(() => {
+    this.countdown--;
+    if (this.countdown === 0) {
+      clearInterval(this.countdownInterval);
+      modal.hide();
+      this.logout(); // auto logout
+    }
+  }, 1000);
+
+}
+
+timeOutModal(){
+  const modalEl = document.getElementById('timeOutModal');
+  const modal = new Modal(modalEl!);
+  modal.show();
+
+  // Reset countdown if modal is opened again
+  this.countdown = 10;
+
+  // Start countdown
+  this.countdownInterval = setInterval(() => {
+    this.countdown--;
+    if (this.countdown === 0) {
+      clearInterval(this.countdownInterval);
+      modal.hide();
+      this.logout(); // auto logout
+    }
+  }, 1000);
+
+}
 
   extractNumericValue(value: any): number | null {
     if (!value) return null;
     const match = String(value).match(/(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) : null;
   }
+
+
+
+
+
+
 }

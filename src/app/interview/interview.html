@@ -35,9 +35,9 @@
     </form>
   </main>
 }
-  <!-- ====================== INTERVIEW SECTION ====================== --> 
-  @if (questions.length){
-    <main class="w-100 h-100">
+<!-- ====================== INTERVIEW SECTION ====================== --> 
+@if (questions.length){
+  <main class="w-100 h-100">
     <div class="row h-100 flex-grow-1 m-0">
       <!-- LEFT -->
       <div class="col-9 h-100 ps-3">
@@ -106,7 +106,7 @@
               }
               <!-- <small class="blur-bg rounded-5 px-2 py-1 ms-2 text-white">⏳ Idle Time {{ timeLeft }}s</small> -->
             </div>
-            <button class="logout-btn" (click)="logout()">Logout</button>
+            <button class="logout-btn" data-bs-toggle="modal" data-bs-target="#endCallModal">Logout</button>
           </footer>
 
         </div>
@@ -137,5 +137,95 @@
       </div>
 
     </div>
-    </main>
-  }
+  </main>
+}
+
+
+
+  <!-- END CALL / LOGOUT MODAL -->
+  <div class="modal fade" id="endCallModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body text-center p-5">
+          <video src="/img/alert.mp4" autoplay muted loop width="120" height="120"></video>
+          <h5 class="fw-bold my-3">End Call?</h5>
+          <small>You're about to end this interview call, this action cannot be undone.</small>
+          <div class="d-flex align-items-center justify-content-center gap-3 mt-5">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">No, Continue</button>
+            <button type="button" class="btn btn-sm btn-danger" (click)="logout()">Yes, End Call</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body text-center p-5 d-flex flex-column align-items-center">
+          <video src="/img/success.mp4" autoplay loop width="120" height="120"></video>
+          <h5 class="fw-semibold text-green my-3">Interview Successfully Completed!</h5>
+          <small>Thank you, [Name Here]! We appreciate your time and effort in completing the interview.</small>
+          <small class="my-4 text-start w-100">
+            <ul class="list-unstyled m-0">
+              <h6>What's Next?</h6>
+              <li>- Our team will carefully review your application.</li>
+              <li>- Expect an update within 5-7 business days.</li>
+            </ul>
+          </small>
+          <small class="text-start">If you have any questions, feel free to reach out. We look forward to connecting with you soon!</small>
+
+          <button type="button" class="btn btn-success w-50 mt-5" (click)="logout()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PROXY MODAL -->
+  <div class="modal fade" id="proxyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body text-center p-5 d-flex flex-column align-items-center">
+          <video src="/img/error.mp4" autoplay loop width="120" height="120"></video>
+          <h5 class="fw-semibold text-danger2 my-3">Interview Terminated</h5>
+          <small>
+            Dear [Name Here],
+            <br><br>
+            Your interview has been automatically ended due to a violation of the instructions.
+            <br><br>
+            If you believe this was an error or need further assistance, please contact our support team.
+          </small>
+
+          <button type="button" class="btn btn-danger w-50 mt-5" (click)="logout()">Close</button>
+          <small>Redirecting in <strong>{{ countdown }}</strong> seconds...</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TIMEOUT MODAL -->
+  <div class="modal fade" id="timeOutModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body text-center p-5 d-flex flex-column align-items-center">
+          <video src="/img/time.mp4" autoplay loop width="120" height="120"></video>
+          <h5 class="fw-semibold text-purple my-3">Session Timed Out!</h5>
+          <small>Dear [Name Here], Your interview session has ended as the allotted time has expired.</small>
+          <small class="my-4 text-start w-100">
+            <ul class="list-unstyled m-0">
+              <h6>What's Next?</h6>
+              <li>- Our team will carefully review your application.</li>
+              <li>- Expect an update within 5-7 business days.</li>
+            </ul>
+          </small>
+          <small class="text-start">If you have any questions, feel free to reach out. We look forward to connecting with you soon!</small>
+
+          <button type="button" class="btn btn-danger w-50 mt-5" (click)="logout()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
