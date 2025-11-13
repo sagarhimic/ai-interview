@@ -290,6 +290,9 @@ startFrameAnalysis() {
             this.stopCamera();
             //alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
             this.proxyDetectedModal();
+            this.stopListening();
+            this.stopRecording();
+            this.playTTS('Critical! Proxy Detected!.');
           } else if (this.status === 'idle') {
             this.playTTS('Are you still there? Please continue speaking.');
           } else if (this.status === 'idle_for_submission') {
