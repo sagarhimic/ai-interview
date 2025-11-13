@@ -108,12 +108,12 @@ export class Interview implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private svc: Interviews,
     private ngZone: NgZone,
-    private _token: Token,
+    private _meetToken: Token,
     private http: HttpClient
   ) {}
 
   ngOnInit(): void {
-    this.user_info = this._token.getUserData();
+    this.user_info = this._meetToken.getUserData();
     this.setupForm = this.fb.group({
       job_title: [this.user_info?.data?.job_title],
       job_description: [this.user_info?.data?.job_description],
@@ -200,7 +200,7 @@ export class Interview implements OnInit, OnDestroy {
 
   /** ⬆️ Upload recorded video to backend */
 uploadFullVideo(blob: Blob) {
-  const candidate = this._token.getUserData();
+  const candidate = this._meetToken.getUserData();
   const candidateId = candidate?.data?.candidate_id || 'unknown';
 
   const formData = new FormData();
@@ -254,7 +254,7 @@ startFrameAnalysis() {
       if (!blob) return;
 
       const formData = new FormData();
-      const candidateID = this._token.getUserData();
+      const candidateID = this._meetToken.getUserData();
       formData.append('candidate_id', candidateID.data.candidate_id);
       formData.append('frame', blob, 'frame.jpg');
 
@@ -346,7 +346,7 @@ submitAnswer(answer: string) {
   const currentQ = this.questions[this.currentIndex];
 
   const formData = new FormData();
-  const candidateID = this._token.getUserData();
+  const candidateID = this._meetToken.getUserData();
 
   formData.append('candidate_id', candidateID.data.candidate_id);
   formData.append('meeting_id', candidateID.data.meeting_id);
@@ -733,7 +733,7 @@ getCandidateSummary() {
   
   this.loadingSubmit = true;
   const formData = new FormData();
-  const candidateID = this._token.getUserData();
+  const candidateID = this._meetToken.getUserData();
 
   formData.append('candidate_id', candidateID.data.candidate_id);
   formData.append('meeting_id', candidateID.data.meeting_id);
@@ -753,7 +753,7 @@ getCandidateSummary() {
     const modalBackdrop = document.querySelector('.modal-backdrop');
     modalBackdrop?.remove();
     
-    this._token.logout();
+    this._meetToken.logout();
   }
 
 
