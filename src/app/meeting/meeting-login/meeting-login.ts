@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -24,13 +24,22 @@ export class MeetingLogin {
       private http: HttpClient,
       private router: Router,
       private auth: MeetingAuth,
-      private _meetToken:MeetingToken
+      private _meetToken:MeetingToken,
+      private renderer: Renderer2
     ) {
       this.form = this.fb.group({
         meeting_id: ['', Validators.required],
         password: ['', Validators.required],
       }); 
     }
+
+    ngOnInit() {
+    this.renderer.addClass(document.body, 'meeting-login');
+  }
+
+  ngOnDestroy() {
+    this.renderer.removeClass(document.body, 'meeting-login');
+  }
 
     login() {
       if (this.form.invalid) return;
@@ -41,7 +50,7 @@ export class MeetingLogin {
 
       this.auth.authentication(formData).subscribe({
         next: (res) => {
-          this._meetToken.setToken(res.access_meetToken);
+          this._meetToken.setToken(res.access_token);
           this._meetToken.setUserData(JSON.stringify(res));
           alert('Login successful!');
           this.router.navigate(['/interview']); // or any route

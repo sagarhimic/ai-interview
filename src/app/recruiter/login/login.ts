@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -25,13 +25,22 @@ export class Login {
       private http: HttpClient,
       private router: Router,
       private auth: Auth,
-      private _token:Token
+      private _token:Token,
+      private renderer: Renderer2
     ) {
       this.form = this.fb.group({
         employee_id: ['', Validators.required],
         password: ['', Validators.required],
       }); 
-    }  
+    }
+
+    ngOnInit() {
+      this.renderer.addClass(document.body, 'recruiter');
+    }
+
+    ngOnDestroy() {
+      this.renderer.removeClass(document.body, 'recruiter');
+    }
 
     login() {
     
@@ -47,7 +56,7 @@ export class Login {
         this._token.setToken(res.access_token);
         this._token.setUserData(JSON.stringify(res));
         alert('Login successful!');
-        this.router.navigate(['/interview']); // or any route
+        this.router.navigate(['/dashboard']); // or any route
       },
       error: (err) => {
         this.errorMessage = err.error.detail || 'Invalid credentials';

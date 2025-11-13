@@ -13,11 +13,11 @@ export class Interviews {
 
   /** Helper: Dynamically build httpOptions with JWT token */
   private getHttpOptions() {
-    const token = localStorage.getItem('access_token'); // ⬅️ token from login
+    const meetToken = localStorage.getItem('meet_access_token'); // ⬅️ token from login
     let headers = new HttpHeaders();
 
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
+    if (meetToken) {
+      headers = headers.set('Authorization', `Bearer ${meetToken}`);
     }
 
     // you can add other headers if needed (ex: JSON or multipart)

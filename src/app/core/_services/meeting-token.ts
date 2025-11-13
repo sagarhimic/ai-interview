@@ -13,13 +13,13 @@ export class MeetingToken {
   }
 
   // ✅ Save token after login
-  setToken(access_token: string): void {
-    localStorage.setItem('access_token', access_token);
+  setToken(meet_access_token: string): void {
+    localStorage.setItem('meet_access_token', meet_access_token);
   }
 
   // ✅ Get stored token
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem('meet_access_token');
   }
 
 
@@ -31,8 +31,8 @@ export class MeetingToken {
   // ✅ Logout user
   logout(): void {
     localStorage.clear();
-    localStorage.removeItem('access_token');
-    this.router.navigate(['/meeting']);
+    localStorage.removeItem('meet_access_token');
+    this.router.navigate(['/meeting-login']);
   }
 
   public getUserData(): any | null {
