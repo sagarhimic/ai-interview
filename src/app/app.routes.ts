@@ -5,6 +5,7 @@ import { MeetingLogin } from './meeting/meeting-login/meeting-login';
 import { Dashboard } from './recruiter/dashboard/dashboard';
 import { Login } from './recruiter/login/login';
 import { Interview } from './meeting/interview/interview';
+import { meetAuthGuard } from './core/guards/meet-auth-guard';
 
 export const routes: Routes = [
 
@@ -14,6 +15,6 @@ export const routes: Routes = [
 
     // MEETING ROUTES
     { path: 'meeting', component: MeetingLogin },
-    { path: 'interview',component: Interview, canActivate: [authGuard] },
-    { path: 'avatar',component: AvatarViewer, canActivate: [authGuard] }
+    { path: 'interview',component: Interview, canActivate: [meetAuthGuard] },
+    { path: 'avatar',component: AvatarViewer, canActivate: [meetAuthGuard] }
 ];

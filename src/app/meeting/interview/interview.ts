@@ -2,10 +2,10 @@ import { Component, ElementRef, NgZone, OnInit, OnDestroy, ViewChild } from '@an
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Interviews } from '../../core/_services/Interviews';
-import { Token } from '../../core/_services/token';
 import { HttpClient } from '@angular/common/http';
 import { AvatarViewer } from '../avatar-viewer/avatar-viewer';
 import { Modal } from 'bootstrap';
+import { MeetingToken } from '../../core/_services/meeting-token';
 
 interface Instruction {
   img: string;
@@ -108,7 +108,7 @@ export class Interview implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private svc: Interviews,
     private ngZone: NgZone,
-    private _meetToken: Token,
+    private _meetToken: MeetingToken,
     private http: HttpClient
   ) {}
 
