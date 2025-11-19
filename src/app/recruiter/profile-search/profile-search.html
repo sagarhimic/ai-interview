@@ -1,0 +1,119 @@
+<div class="mb-20">
+    <h5 class="mb-0">Search Profiles</h5>
+</div>
+
+<div class="row">
+    <!-- FILTERS -->
+    <div class="col-md-4">
+        <div class="trezo-card border-radius d-block bg-white border-0 shadow-none">
+            <div class="trezo-card-content">
+                <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+                    <div class="row g-3">
+                        <div class="col-12 d-flex flex-column">
+                            <label for="role" class="form-label">Role<em class="text-danger2">*</em></label>
+                            <input type="text" class="form-control form-control-sm" id="role" formControlName="role" placeholder="Enter role">
+                        </div>
+                        <div class="col-12 d-flex flex-column">
+                            <label for="skills" class="form-label">Skills</label>
+                            <input type="text" class="form-control form-control-sm" id="skills" formControlName="skills" placeholder="Enter skills separated by commas">
+                        </div>
+                        <div class="col-12 d-flex flex-column">
+                            <label for="location" class="form-label">Location<em class="text-danger2">*</em></label>
+                            <input type="text" class="form-control form-control-sm" id="location" formControlName="location" placeholder="Enter location">
+                        </div>
+                        
+                        <div class="col-12 d-flex flex-column">
+                            <label for="company" class="form-label">Company</label>
+                            <input type="text" class="form-control form-control-sm" id="company" formControlName="company" placeholder="Enter company name">
+                        </div>
+                        <div class="col-md-6 d-flex flex-column">
+                            <label for="min_exp" class="form-label">Min. Experience (years)<em class="text-danger2">*</em></label>
+                            <input type="number" class="form-control form-control-sm" id="min_exp" formControlName="min_exp" placeholder="Enter min exp">
+                        </div>
+                        <div class="col-md-6 d-flex flex-column">
+                            <label for="max_exp" class="form-label">Max. Experience (years)<em class="text-danger2">*</em></label>
+                            <input type="number" class="form-control form-control-sm" id="max_exp" formControlName="max_exp" placeholder="Enter max exp">
+                        </div>
+
+                        <div class="col-md-12 mt-4 d-flex justify-content-center align-items-center mb-1">
+                            <button type="submit" class="btn btn-primary btn-sm w-50" [disabled]="searchForm.invalid">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- SEARCH RESULTS -->
+    <div class="col-md-8">
+
+        @if (loading) {
+            <div class="trezo-card border-radius d-block bg-white border-0 shadow-none">
+                <div class="trezo-card-content">
+                    <div class="text-center my-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (allProfiles.length > 0) {
+            <div>
+                <h5 class="fw-bold mb-3">Search Results ({{ allProfiles.length }})</h5>
+                @for (p of visibleProfiles; track $index) {
+                    <div class="trezo-card mb-3 p-3 border-radius d-block bg-white border-0 shadow-none  search-profile-card">
+                        <div class="trezo-card-content">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="profile-avatar d-flex align-items-center justify-content-center flex-shrink-0 me-3">{{ p.title?.charAt(0) }}</span>
+                                
+                                <div class="flex-grow-1">
+                                    <div>
+                                        <a class="fw-bold fs-6 mb-2 d-flex text-primary" [href]="p.profile_url" target="_blank">{{ p.title }}</a>
+                                        <div>
+                                            <small>
+                                                <b>Platform:</b>
+                                                <span class="ms-2 d-inline-flex px-1 py-0 fw-semibold text-success-emphasis bg-success-subtle border border-success-subtle rounded-2">{{ p.platforms[0] }}</span>
+                                            </small>
+                                            <small class="ms-2 border-start ps-2">
+                                                <b>Experience:</b>
+                                                <span class="ms-2 d-inline-flex px-1 py-0 fw-semibold text-warning-emphasis bg-warning-subtle border border-warning-subtle rounded-2">{{ p.experience_years ? p.experience_years + ' years' : 'Not Available' }}</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <small class="mb-1"><b>Summary:</b> {{ p.summary }}</small>
+                                </div>
+
+                                <span class="match-score d-flex flex-column align-items-center justify-content-center flex-shrink-0 ms-4">
+                                    <h2 class="mb-0 fw-bold mb-2">{{ p.match_score }}</h2>
+                                    <small class="fw-semibold">Match Score</small>
+                                </span>
+
+                                <!-- <a class="btn btn-sm btn-outline-primary ms-4 flex-shrink-0" [href]="p.profile_url" target="_blank">View Profile</a> -->
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (currentIndex < allProfiles.length) {
+                <div class="trezo-card border-radius d-block bg-white border-0 shadow-none">
+                    <div class="trezo-card-content">
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary btn-sm" (click)="loadMore()">Load More</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (!loading && allProfiles.length === 0) {
+            <div class="trezo-card border-radius d-block bg-white border-0 shadow-none">
+                <div class="trezo-card-content">
+                    <div class="text-center my-5">
+                        <p class="mb-0">No profiles found. Please adjust your search criteria.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

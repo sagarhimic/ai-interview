@@ -33,14 +33,6 @@ export class MeetingLogin {
       }); 
     }
 
-    ngOnInit() {
-    this.renderer.addClass(document.body, 'meeting-login');
-  }
-
-  ngOnDestroy() {
-    this.renderer.removeClass(document.body, 'meeting-login');
-  }
-
     login() {
       if (this.form.invalid) return;
       this.loading = true;
@@ -53,6 +45,7 @@ export class MeetingLogin {
           this._meetToken.setToken(res.access_token);
           this._meetToken.setUserData(JSON.stringify(res));
           alert('Login successful!');
+          document.body.classList.add('meeting');
           this.router.navigate(['/interview']); // or any route
         },
         error: (err) => {

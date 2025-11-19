@@ -32,6 +32,7 @@ export class Token {
   logout(): void {
     localStorage.clear();
     localStorage.removeItem('access_token');
+    document.body.classList.remove('recruiter');
     this.router.navigate(['/']);
   }
 

@@ -1,0 +1,51 @@
+form{
+    label{
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 3px;
+    }
+}
+
+
+.profile-avatar{
+    width: 64px;
+    height: 64px;
+    background: #f2ebff;
+    color: purple;
+    border-radius: 51%;
+    font-size: 1.5rem;
+    font-weight: 200;
+}
+
+
+.match-score{
+    width: 120px;height: 120px;
+    border-radius: 10px;
+    background: #CAC9FF;
+    background: radial-gradient(circle, rgb(230 230 255) 0%, rgb(185 184 255) 100%);
+    background: linear-gradient(120deg, #F7C0EC, #A7BDEA);
+
+    h2{
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primaryColor);
+        background: #fff;
+        border-radius: 51%;
+    }
+
+    small{
+        font-size: 0.688rem !important;
+        text-transform: uppercase;
+        color: #02061c;
+    }
+}
+
+.search-profile-card{
+    small{font-size: 0.75rem;}
+}
+
+
+.card{background:#273142;border: 1px solid #d1d5db33;border-radius: 8px;}

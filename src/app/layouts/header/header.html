@@ -1,0 +1,257 @@
+<!-- card-without-border-radius, card-with-box-shadow, component-rtl-enabled, right-sidebar, hide-sidebar, card-borderd, dark-header -->
+<div class="header-area bg-white border-bottom-radius transition card-borderd card-with-box-shadow" [ngClass]="{'active': isSidebarToggled, 'sticky': isSticky}">
+    <div class="inner-area d-md-flex align-items-center justify-content-between">
+        <div class="header-left-side d-flex align-items-center">
+            <div class="burger-menu transition position-relative lh-1" [ngClass]="{'active': isSidebarToggled}" (click)="toggle()">
+                <i class="material-symbols-outlined">menu</i>
+            </div>
+            <!-- <a routerLink="/dashboard" class="logo">
+                <img src="images/logo.svg" alt="logo">
+            </a>
+            <a routerLink="/dashboard" class="logo white-logo">
+                <img src="images/white-logo.svg" alt="logo">
+            </a> -->
+            <!-- <form class="search-box position-relative">
+                <input type="text" class="input-search d-block w-100 border-radius" placeholder="Search here.....">
+                <button type="submit" class="bg-transparent p-0 border-0 transition">
+                    <i class="material-symbols-outlined">search</i>
+                </button>
+            </form>
+            <div class="connected-apps-menu position-relative">
+                <button type="button" (click)="toggleConnectedAppsDropdown()" class="menu-btn p-0 border-0 bg-transparent d-inline-block position-relative transition lh-1">
+                    <i class="material-symbols-outlined">apps</i>
+                </button>
+                @if (isConnectedAppsDropdownOpen) {
+                    <div class="connected-apps-dropdown bg-white border-radius">
+                        <ul class="p-0 mb-0 list-unstyled text-center">
+                            <li>
+                                <a href="https://www.figma.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/figma.svg" alt="figma">
+                                    <span class="d-block">Figma</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://dribbble.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/dribbble.svg" alt="dribbble">
+                                    <span class="d-block">Dribbble</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://open.spotify.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/spotify.svg" alt="spotify">
+                                    <span class="d-block">Spotify</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://gitlab.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/gitlab.svg" alt="gitlab">
+                                    <span class="d-block">Gitlab</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://drive.google.com/drive/u/0/home" target="_blank" class="d-block">
+                                    <img src="images/icons/google-drive.svg" alt="google-drive">
+                                    <span class="d-block">GDrive</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://trello.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/trello.svg" alt="trello">
+                                    <span class="d-block">Trello</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://slack.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/slack.svg" alt="slack">
+                                    <span class="d-block">Slack</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.pinterest.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/pinterest.svg" alt="pinterest">
+                                    <span class="d-block">Pinterest</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.facebook.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/facebook.svg" alt="facebook">
+                                    <span class="d-block">Facebook</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.linkedin.com/" target="_blank" class="d-block">
+                                    <img src="images/icons/linkedin.svg" alt="linkedin">
+                                    <span class="d-block">LinkedIn</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </div> -->
+        </div>
+        <ul class="header-right-side d-flex align-items-center m-0 p-0 list-unstyled">
+            <!-- <li class="position-relative">
+                <button (click)="toggleTheme()" class="dark-swtich-btn bg-transparent d-inline-block p-0 border-0 lh-1 position-relative">
+                    <i class="material-symbols-outlined">light_mode</i>
+                </button>
+            </li> -->
+            <!-- <li class="position-relative language-menu">
+                <button type="button" (click)="toggleLanguageDropdown()" class="language-menu-btn lh-1 transition bg-transparent border-0 d-inline-block position-relative">
+                    <i class="material-symbols-outlined">translate</i>
+                </button>
+                @if (isLanguageDropdownOpen) {
+                    <div class="language-menu-dropdown bg-white border-radius">
+                        <span class="title fw-semibold text-black d-block">
+                            Choose Language
+                        </span>
+                        <ul class="menu-body p-0 mb-0 mt-0 list-unstyled">
+                            <li>
+                                <button class="d-block w-100 bg-transparent fw-medium border-0 text-start">
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/flags/usa.svg" alt="usa">
+                                        English
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="d-block w-100 bg-transparent fw-medium border-0 text-start">
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/flags/france.svg" alt="france">
+                                        French
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="d-block w-100 bg-transparent fw-medium border-0 text-start">
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/flags/germany.svg" alt="germany">
+                                        German
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="d-block w-100 bg-transparent fw-medium border-0 text-start">
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/flags/portugal.svg" alt="portugal">
+                                        Portuguese
+                                    </div>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="d-block w-100 bg-transparent fw-medium border-0 text-start">
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/flags/spain.svg" alt="spain">
+                                        Spanish
+                                    </div>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </li> -->
+            <li class="position-relative notifications-menu">
+                <button type="button" (click)="toggleNotificationsDropdown()" class="notifications-menu-btn d-inline-block transition p-0 border-0 bg-transparent lh-1 position-relative">
+                    <i class="material-symbols-outlined">notifications</i>
+                    <div class="dot rounded-circle"></div>
+                </button>
+                @if (isNotificationsDropdownOpen) {
+                    <div class="notifications-menu-dropdown bg-white border-radius">
+                        <div class="title d-flex align-items-center justify-content-between">
+                            <span class="fw-semibold text-black">
+                                Notifications
+                                <span class="text-body fw-normal">(03)</span>
+                            </span>
+                            <a href="javascript:void(0);" class="text-primary">Clear All</a>
+                        </div>
+                        <ul class="menu-body p-0 mt-0 list-unstyled">
+                            <li class="position-relative text-center">
+                                <em>No Notifications</em>
+                            </li>
+                            <!-- <li class="position-relative">
+                                <div class="icon rounded-circle d-flex align-items-center justify-content-center position-absolute text-center transition">
+                                    <i class="material-symbols-outlined">sms</i>
+                                </div>
+                                <span class="sub-title d-block text-black">You have requested to <strong class="fw-semibold">withdrawal</strong></span>
+                                <span class="time d-block">2 hrs ago</span>
+                                <a routerLink="/dashboard/notifications" class="d-block left-0 top-0 bottom-0 right-0 z-1 position-absolute"></a>
+                            </li>
+                            <li class="position-relative">
+                                <div class="icon rounded-circle d-flex align-items-center justify-content-center position-absolute text-center transition">
+                                    <i class="material-symbols-outlined">person</i>
+                                </div>
+                                <span class="sub-title d-block text-black"><strong class="fw-semibold">A new user</strong> added in Trezo</span>
+                                <span class="time d-block">3 hrs ago</span>
+                                <a routerLink="/dashboard/notifications" class="d-block left-0 top-0 bottom-0 right-0 z-1 position-absolute"></a>
+                                <span class="unread d-inline-block rounded-circle bg-primary position-absolute"></span>
+                            </li>
+                            <li class="position-relative">
+                                <div class="icon rounded-circle d-flex align-items-center justify-content-center position-absolute text-center transition">
+                                    <i class="material-symbols-outlined">mark_email_unread</i>
+                                </div>
+                                <span class="sub-title d-block text-black">You have requested to <strong class="fw-semibold">withdrawal</strong></span>
+                                <span class="time d-block">1 day ago</span>
+                                <a routerLink="/dashboard/notifications" class="d-block left-0 top-0 bottom-0 right-0 z-1 position-absolute"></a>
+                            </li> -->
+                        </ul>
+                        <div class="menu-footer text-center">
+                            <a routerLink="/dashboard/notifications" class="d-inline-block fw-medium position-relative text-primary">
+                                See All Notifications
+                            </a>
+                        </div>
+                    </div>
+                }
+            </li>
+            <li class="position-relative profile-menu">
+                <button type="button" (click)="toggleProfileDropdown()" class="profile-menu-btn border-0 bg-transparent position-relative">
+                    <img src="img/avatar-3.png" class="rounded-circle" alt="admin-image">
+                    <span class="fw-semibold text-black">{{ loggedInUser?.user?.name.split(' ')[0] }}</span>
+                </button>
+                @if (isProfileDropdownOpen) {
+                    <div class="profile-menu-dropdown bg-white border-radius">
+                        <div class="admin d-flex align-items-center">
+                            <img src="img/avatar-3.png" class="rounded-circle" alt="admin-image">
+                            <div>
+                                <span class="d-block text-black fw-medium">{{ loggedInUser?.user?.name }}</span>
+                                <span class="d-block">{{ loggedInUser?.user?.employee_id }}</span>
+                            </div>
+                        </div>
+                        <ul class="list p-0 mt-0 mb-0 list-unstyled">
+                            <li>
+                                <a routerLink="/dashboard/my-profile" class="d-block position-relative">
+                                    <i class="material-symbols-outlined">account_circle</i>
+                                    My Profile
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="border-top"></div>
+                        <ul class="list p-0 mt-0 mb-0 list-unstyled">
+                            <li>
+                                <a routerLink="/settings" class="d-block position-relative">
+                                    <i class="material-symbols-outlined">settings</i>
+                                    Settings
+                                </a>
+                            </li>
+                            <li>
+                                <a routerLink="/support" class="d-block position-relative">
+                                    <i class="material-symbols-outlined">support</i>
+                                    Support
+                                </a>
+                            </li>
+                            <li>
+                                <a routerLink="/logout" (click)="logout()" class="d-block position-relative">
+                                    <i class="material-symbols-outlined">logout</i>
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </li>
+            <!-- <li class="position-relative">
+                <button type="button" class="settings-btn border-0 transition lh-1 position-relative bg-transparent p-0 d-inline-block" (click)="settingsButtonToggle()" [ngClass]="{'active': isToggled}">
+                    <i class="material-symbols-outlined">settings</i>
+                </button>
+            </li> -->
+        </ul>
+    </div>
+</div>

@@ -1,14 +1,14 @@
-import { Component, Renderer2 } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../core/_services/auth';
 import { Token } from '../../core/_services/token';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -34,14 +34,6 @@ export class Login {
       }); 
     }
 
-    ngOnInit() {
-      this.renderer.addClass(document.body, 'recruiter');
-    }
-
-    ngOnDestroy() {
-      this.renderer.removeClass(document.body, 'recruiter');
-    }
-
     login() {
     
     if (this.form.invalid) return;
@@ -56,6 +48,7 @@ export class Login {
         this._token.setToken(res.access_token);
         this._token.setUserData(JSON.stringify(res));
         alert('Login successful!');
+        document.body.classList.add('recruiter');
         this.router.navigate(['/dashboard']); // or any route
       },
       error: (err) => {

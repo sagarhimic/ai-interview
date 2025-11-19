@@ -1,0 +1,22 @@
+<main class="card-borderd card-with-box-shadow">  <!-- card-borderd, card-with-box-shadow, card-without-border-radius, with-navbar -->
+    <!-- Start Sidebar Area -->
+    <app-menu></app-menu>
+    <!-- End Sidebar Area -->
+
+    <!-- Start Main Content Area -->
+    <div class="main-content transition d-flex flex-column" [ngClass]="{'active': isSidebarToggled}">
+        <!-- right-sidebar, hide-sidebar -->
+        <div class="d-flex flex-column">
+            <!-- Start Header Area -->
+            <app-header></app-header>
+            <!-- End Header Area -->
+
+            <!-- Start Content Area -->
+            <div class="main-content-container overflow-hidden">
+                <router-outlet></router-outlet>
+            </div>
+            <!-- End Content Area -->
+        </div>
+    </div>
+    <!-- End Main Content Area -->
+</main>

@@ -3,14 +3,19 @@ import { provideRouter } from '@angular/router';
 import { provideNgToast } from 'ng-angular-popup';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { loadingInterceptor } from './core/interceptors/loading-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([
+        loadingInterceptor
+      ])
+    ),
     provideNgToast({
       duration: 5000,              // Default 5 seconds
       //position: 'top-right',       // Default position

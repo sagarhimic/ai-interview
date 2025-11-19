@@ -1,0 +1,233 @@
+// Transition
+.transition {transition: var(--transition) !important;}
+
+// Border Radius
+.border{
+    &-radius {
+        border-radius: 7px !important;
+    }
+    &-top-radius {
+        border-radius: 7px 7px 0 0 !important;
+    }
+    &-bottom-radius {
+        border-radius: 0 0 7px 7px !important;
+    }
+    &-right-radius {
+        border-radius: 0 7px 7px 0 !important;
+    }
+    &-left-radius {
+        border-radius: 7px 0 0 7px !important;
+    }
+}
+
+// Text Color
+.text{
+    &-black{color: var(--blackColor) !important;}
+    &-primary{color: var(--primaryColor) !important;}
+    &-body{color: var(--bodyColor) !important;}
+    &-secondary{color: var(--secondaryColor) !important;}
+    &-success{color: var(--successColor) !important;}
+    &-danger{color: var(--dangerColor) !important;}
+    &-warning{color: var(--warningColor) !important;}
+    &-info{color: var(--infoColor) !important;}
+    &-light{color: var(--lightColor) !important;}
+    &-dark{color: var(--darkColor) !important;}
+    &-purple{color: var(--purpleColor) !important;}
+    &-orange{color: var(--orangeColor) !important;}
+}
+
+// BG Color
+.bg{
+    &-black{background-color: var(--blackColor) !important;}
+    &-primary{background-color: var(--primaryColor) !important;}
+    &-body{background-color: var(--bodyColor) !important;}
+    &-gray{background-color: #F5F7F8 !important;}
+    &-secondary{background-color: var(--secondaryColor) !important;}
+    &-success{background-color: var(--successColor) !important;}
+    &-danger{background-color: var(--dangerColor) !important;}
+    &-warning{background-color: var(--warningColor) !important;}
+    &-info{background-color: var(--infoColor) !important;}
+    &-light{background-color: var(--lightColor) !important;}
+    &-dark{background-color: var(--darkColor) !important;}
+    &-purple{background-color: var(--purpleColor) !important;}
+    &-orange{background-color: var(--orangeColor) !important;}
+    &-primary-50{background-color: #ECF0FF !important;}
+    &-danger-50{background-color: #FFF2F0 !important;}
+    &-success-50{background-color: #EEFFE5 !important;}
+    &-secondary-50{background-color: #EEF6FF !important;}
+    &-purple-50{background-color: #FAF5FF !important;}
+    &-orange-50{background-color: #FFF5ED !important;}
+    &-purple-100{background-color: #F3E8FF !important;}
+    &-orange-100{background-color: #FFE8D4 !important;}
+    &-success-100{background-color: #D8FFC8 !important;}
+    &-secondary-100{background-color: #DAEBFF !important;}
+    &-primary-100{background-color: #DDE4FF !important;}
+    &-danger-100{background-color: #FFE1DD !important;}
+    &-danger-200{background-color: #FFC8C0 !important;}
+    &-primary-500{background-color: var(--primaryColor) !important;}
+}
+
+// Margin
+.m{
+    &-25{margin: 25px !important;}
+    &t-25{margin-top: 25px !important;}
+    &b-25{margin-bottom: 25px !important;}
+    &t-15{margin-top: 15px !important;}
+    &r-15{margin-right: 15px !important;}
+    &b-15{margin-bottom: 15px !important;}
+    &l-15{margin-left: 15px !important;}
+    &t-20{margin-top: 20px !important;}
+    &r-20{margin-right: 20px !important;}
+    &b-20{margin-bottom: 20px !important;}
+    &l-20{margin-left: 20px !important;}
+    &t-10{margin-top: 10px !important;}
+    &r-10{margin-right: 10px !important;}
+    &b-10{margin-bottom: 10px !important;}
+    &l-10{margin-left: 10px !important;}
+    &t-17{margin-top: 17px !important;}
+    &r-17{margin-right: 17px !important;}
+    &b-17{margin-bottom: 17px !important;}
+    &l-17{margin-left: 17px !important;}
+    &t-12{margin-top: 12px !important;}
+    &r-12{margin-right: 12px !important;}
+    &b-12{margin-bottom: 12px !important;}
+    &l-12{margin-left: 12px !important;}
+}
+
+// Text Align
+.text{
+    &-start {
+        text-align: start !important;
+    }
+    &-end {
+        text-align: end !important;
+    }
+}
+
+// Width
+.w{
+    &-130 {width: 130px !important;}
+    &-110 {width: 110px !important;}
+    &-90 {width: 90px !important;}
+    &-70 {width: 70px !important;}
+    &-45 {width: 45px !important;}
+}
+
+// Height
+.h{
+    &-130 {height: 130px !important;}
+    &-110 {height: 110px !important;}
+    &-90 {height: 90px !important;}
+    &-70 {height: 70px !important;}
+    &-45 {height: 45px !important;}
+}
+
+// Font Size
+.fs{
+    &-25 {font-size: 25px !important;}
+    &-20 {font-size: 20px !important;}
+    &-18 {font-size: 18px !important;}
+    &-16 {font-size: 16px !important;}
+}
+
+// Cursor
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+/* Min width 1600px */
+@media (min-width: 1600px) {
+
+    // Columns
+    .col-xxxl-12 {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    .col-xxxl-11 {
+        flex: 0 0 auto;
+        width: 91.66666667%;
+    }
+    .col-xxxl-10 {
+        flex: 0 0 auto;
+        width: 83.33333333%;
+    }
+    .col-xxxl-9 {
+        flex: 0 0 auto;
+        width: 75%;
+    }
+    .col-xxxl-8 {
+        flex: 0 0 auto;
+        width: 66.66666667%;
+    }
+    .col-xxxl-7 {
+        flex: 0 0 auto;
+        width: 58.33333333%;
+    }
+    .col-xxxl-6 {
+        flex: 0 0 auto;
+        width: 50%;
+    }
+    .col-xxxl-5 {
+        flex: 0 0 auto;
+        width: 41.66666667%;
+    }
+    .col-xxxl-4 {
+        flex: 0 0 auto;
+        width: 33.33333333%;
+    }
+    .col-xxxl-3 {
+        flex: 0 0 auto;
+        width: 25%;
+    }
+    .col-xxxl-2\/5 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+    .col-xxxl-2 {
+        flex: 0 0 auto;
+        width: 16.66666667%;
+    }
+    .col-xxxl-1 {
+        flex: 0 0 auto;
+        width: 8.33333333%;
+    }
+
+    // Orders
+    .order-xxxl-1 {
+        order: 1 !important;
+    }
+    .order-xxxl-2 {
+        order: 2 !important;
+    }
+    .order-xxxl-3 {
+        order: 3 !important;
+    }
+    .order-xxxl-4 {
+        order: 4 !important;
+    }
+    .order-xxxl-5 {
+        order: 5 !important;
+    }
+    .order-xxxl-6 {
+        order: 6 !important;
+    }
+    .order-xxxl-7 {
+        order: 7 !important;
+    }
+    .order-xxxl-8 {
+        order: 8 !important;
+    }
+    .order-xxxl-9 {
+        order: 9 !important;
+    }
+    .order-xxxl-10 {
+        order: 10 !important;
+    }
+    .order-xxxl-11 {
+        order: 11 !important;
+    }
+    .order-xxxl-12 {
+        order: 12 !important;
+    }
+
+}

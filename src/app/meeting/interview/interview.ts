@@ -1,4 +1,4 @@
-import { Component, ElementRef, NgZone, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnInit, OnDestroy, ViewChild, Renderer2 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Interviews } from '../../core/_services/Interviews';
@@ -109,10 +109,14 @@ export class Interview implements OnInit, OnDestroy {
     private svc: Interviews,
     private ngZone: NgZone,
     private _meetToken: MeetingToken,
-    private http: HttpClient
+    private http: HttpClient,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
+
+    this.renderer.addClass(document.body, 'meeting');
+
     this.user_info = this._meetToken.getUserData();
     this.setupForm = this.fb.group({
       job_title: [this.user_info?.data?.job_title],
@@ -330,6 +334,7 @@ startFrameAnalysis() {
 
 /** ✅ Cleanup when component unloads */
   ngOnDestroy() {
+    this.renderer.removeClass(document.body, 'meeting');
     console.log('🧹 Cleaning up resources...');
     this.stopRecording();
     this.stopCamera();
@@ -756,7 +761,6 @@ getCandidateSummary() {
   logout() {
     const modalBackdrop = document.querySelector('.modal-backdrop');
     modalBackdrop?.remove();
-    
     this._meetToken.logout();
   }
 

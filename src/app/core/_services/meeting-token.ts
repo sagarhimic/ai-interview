@@ -32,6 +32,7 @@ export class MeetingToken {
   logout(): void {
     localStorage.clear();
     localStorage.removeItem('meet_access_token');
+    document.body.classList.remove('meeting');
     this.router.navigate(['/meeting-login']);
   }
 

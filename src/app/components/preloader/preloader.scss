@@ -1,0 +1,18 @@
+.preloader-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+    }
+    .loader {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      border: 6px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
