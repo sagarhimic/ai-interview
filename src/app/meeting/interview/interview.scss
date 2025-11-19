@@ -40,10 +40,15 @@ h2 {
 
 .logout-btn {
   background: $danger;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 50%;
   cursor: pointer;
   font-weight: 500;
   float: right;
@@ -53,6 +58,8 @@ h2 {
     background: color.scale($danger, $lightness: -10%);
   }
 }
+.instructions h6{color: #020213;}
+.instructions p{color: #293951;line-height: 1.45rem;}
 
 // 🧠 Start Interview Section
 .start-section {

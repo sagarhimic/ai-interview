@@ -3,7 +3,7 @@
   <main class="w-100 min-vh-100 d-flex flex-column p-5">
     <!-- Hidden Form Fields -->
     <div class="d-flex flex-column mb-4 text-center text-white">
-      <h1 class="mb-1 h3 fw-bold">Interview Guidelines</h1>
+      <h1 class="mb-1 h3 fw-bold text-white">Interview Guidelines</h1>
       <small>Please read the instructions carefully before beginning your interview.</small>
     </div>
     <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
@@ -55,7 +55,7 @@
           <div class="col-12 flex-grow-1 ai-user-wrapper">
             <div class="row h-100">
               <!-- AI BLOCK -->
-              <div class="col-7 flex-grow-1">
+              <div class="col-7 flex-grow-1 h-100">
                 <div class="ai-wrapper w-100 h-100 rounded-5 position-relative bg-white overflow-hidden">
                   <!-- AI AVATAR -->
                   <app-avatar-viewer class="d-flex w-100 h-100" style="background:rgba(255, 255, 255, 0.25)" #avatar></app-avatar-viewer>
@@ -109,7 +109,9 @@
               }
               <!-- <small class="blur-bg rounded-5 px-2 py-1 ms-2 text-white">⏳ Idle Time {{ timeLeft }}s</small> -->
             </div>
-            <button class="logout-btn" data-bs-toggle="modal" data-bs-target="#endCallModal">Logout</button>
+            <button class="logout-btn" data-bs-toggle="modal" data-bs-target="#endCallModal">
+              <span class="material-symbols-outlined">call_end</span>
+            </button>
           </footer>
 
         </div>
