@@ -1,6 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { PreloaderService } from '../../core/_services/preloader-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-preloader',
@@ -10,6 +11,8 @@ import { PreloaderService } from '../../core/_services/preloader-service';
 })
 export class Preloader {
 
-  constructor(public preloader: PreloaderService) {}
+  constructor(public preloader: PreloaderService,
+              public router: Router
+  ) {}
 
 }

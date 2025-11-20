@@ -1,4 +1,4 @@
-@if (preloader.loading$ | async) {
+@if (router.url !== '/interview' && (preloader.loading$ | async)) {
 <div class="preloader-overlay">
     <div class="loader">
         
