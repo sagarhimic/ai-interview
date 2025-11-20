@@ -63,42 +63,42 @@ export class Interview implements OnInit, OnDestroy {
 
   instructions: Instruction[] = [
     {
-      img: '/img/web-security.png',
+      img: 'img/web-security.png',
       title: 'Navigating the Interview Platform:',
       text: `After clicking <span class="purple-text-color">"Get Started"</span>, do not use the back button, open a new tab/window, or view your browsing history. Doing so will automatically end your interview session.`
     },
     {
-      img: '/img/web-camera.png',
+      img: 'img/web-camera.png',
       title: 'Camera Usage:',
       text: `Your camera must remain <span class="purple-text-color">on at all times</span> during the interview. If the camera is turned off or disabled, the interview will end immediately.`
     },
     {
-      img: '/img/working-time.png',
+      img: 'img/working-time.png',
       title: 'Timeliness:',
       text: `Complete the interview within the allotted time. When the scheduled time ends, the interview will automatically close.`
     },
     {
-      img: '/img/wireless-connection.png',
+      img: 'img/wireless-connection.png',
       title: 'Internet Connectivity:',
       text: `Ensure you have a <span class="purple-text-color">stable and uninterrupted internet connection</span> to avoid disruptions.`
     },
     {
-      img: '/img/maintenance.png',
+      img: 'img/maintenance.png',
       title: 'Technical Issues:',
       text: `If you face any technical difficulties, please contact us via email at <span class="purple-text-color">[mail id]</span>.`
     },
     {
-      img: '/img/padlock.png',
+      img: 'img/padlock.png',
       title: 'Re-Login Policy:',
       text: `Once you log out or exit the interview, <span class="purple-text-color">re-login is not permitted</span>.`
     },
     {
-      img: '/img/video-camera.png',
+      img: 'img/video-camera.png',
       title: 'Recording Notice:',
       text: `The entire interview session will be <span class="purple-text-color">recorded for evaluation and review</span> purposes.`
     },
     {
-      img: '/img/voice-message.png',
+      img: 'img/voice-message.png',
       title: 'Answer Capturing:',
       text: `All your responses will be <span class="purple-text-color">recorded and stored as transcripts</span> for review purposes.`
     }
