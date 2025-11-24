@@ -3,6 +3,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 import { Toggle } from '../../core/_services/toggle';
 import { CommonModule } from '@angular/common';
 import { NgScrollbarModule } from 'ngx-scrollbar';
+import { ThemeService } from '../../core/_services/theme-service';
 
 
 interface MenuItem {
@@ -25,10 +26,14 @@ export class Menu {
     isToggled = false;
 
     constructor(
-        private toggleService: Toggle
+        private toggleService: Toggle,
+            public themeService: ThemeService
     ) {
         this.toggleService.isSidebarToggled$.subscribe(isSidebarToggled => {
             this.isSidebarToggled = isSidebarToggled;
+        });
+        this.themeService.isToggled$.subscribe(isToggled => {
+            this.isToggled = isToggled;
         });
     }
 

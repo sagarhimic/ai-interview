@@ -5,6 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../core/_services/auth';
 import { Token } from '../../core/_services/token';
+import { NgToastService } from 'ng-angular-popup';
+import { ROUTES } from '../../core/constants/routes';
+import { RecruiterAuthResponse } from '../../core/models/api-responses';
 
 @Component({
   selector: 'app-login',
@@ -12,30 +15,30 @@ import { Token } from '../../core/_services/token';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-
-export class Login {
+export class Login implements OnInit, OnDestroy {
    
-    loading = false;
-    errorMessage = '';
-    form  : any;
-    user_info : any;
+  loading = false;
+  errorMessage = '';
+  form!: FormGroup;
 
-    constructor(
-      private fb: FormBuilder,
-      private http: HttpClient,
-      private router: Router,
-      private auth: Auth,
-      private _token:Token,
-      private renderer: Renderer2
-    ) {
-      this.form = this.fb.group({
-        employee_id: ['', Validators.required],
-        password: ['', Validators.required],
-      }); 
-    }
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
+    private auth: Auth,
+    private _token: Token,
+    private renderer: Renderer2,
+    private toast: NgToastService
+  ) {}
 
-    login() {
-    
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      employee_id: ['', Validators.required],
+      password: ['', Validators.required],
+    });
+  }
+
+  login(): void {
     if (this.form.invalid) return;
 
     this.loading = true;
@@ -44,26 +47,23 @@ export class Login {
     formData.append('password', this.form.value.password!);
 
     this.auth.authentication(formData).subscribe({
-      next: (res) => {
+      next: (res: RecruiterAuthResponse) => {
         this._token.setToken(res.access_token);
         this._token.setUserData(JSON.stringify(res));
-        alert('Login successful!');
+        this.toast.success('Login successful!');
         document.body.classList.add('recruiter');
-        this.router.navigate(['/dashboard']); // or any route
+        this.router.navigate([ROUTES.RECRUITER.DASHBOARD]);
+        this.loading = false;
       },
       error: (err) => {
-        this.errorMessage = err.error.detail || 'Invalid credentials';
+        this.errorMessage = err.message || 'Invalid credentials';
+        this.toast.danger(this.errorMessage);
         this.loading = false;
       },
     });
   }
 
-  GetUserInfo() {
-    
-    this.loading = true;
-    
-    const user_info = this._token.getUserData;
-    
-    console.log(user_info);
+  ngOnDestroy(): void {
+    // Cleanup if needed
   }
 }

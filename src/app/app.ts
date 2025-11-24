@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal, DestroyRef, inject } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Preloader } from './components/preloader/preloader';
 import { PreloaderService } from './core/_services/preloader-service';
 
@@ -10,29 +10,27 @@ import { PreloaderService } from './core/_services/preloader-service';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-
-  private sub: Subscription;
+export class App implements OnInit {
 
   protected readonly title = signal('ai-interview');
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private router: Router, private preloader: PreloaderService) {
+  constructor(private router: Router, private preloader: PreloaderService) {}
 
-    this.sub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        this.preloader.show();
-      }
-      if (
-        event instanceof NavigationEnd ||
-        event instanceof NavigationCancel ||
-        event instanceof NavigationError
-      ) {
-        this.preloader.hide();
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.sub?.unsubscribe();
+  ngOnInit(): void {
+    this.router.events
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (event instanceof NavigationStart) {
+          this.preloader.show();
+        }
+        if (
+          event instanceof NavigationEnd ||
+          event instanceof NavigationCancel ||
+          event instanceof NavigationError
+        ) {
+          this.preloader.hide();
+        }
+      });
   }
 }

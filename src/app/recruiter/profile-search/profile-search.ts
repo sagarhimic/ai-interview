@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { XraySearch } from '../../core/_services/xray-search';
+import { NgToastService } from 'ng-angular-popup';
+import { XraySearchResponse, CandidateProfile } from '../../core/models/api-responses';
 
 @Component({
   selector: 'app-profile-search',
@@ -8,7 +10,7 @@ import { XraySearch } from '../../core/_services/xray-search';
   templateUrl: './profile-search.html',
   styleUrl: './profile-search.scss',
 })
-export class ProfileSearch {
+export class ProfileSearch implements OnDestroy {
 
   searchForm = new FormGroup({
     role: new FormControl(''),
@@ -22,63 +24,73 @@ export class ProfileSearch {
     limit: new FormControl(20),
   });
 
-  responseData: any = null;     // store entire response
+  responseData: XraySearchResponse | null = null;
   loading = false;
-
-  allProfiles: any[] = [];     // full list (100)
-  visibleProfiles: any[] = []; // profiles shown on UI
+  allProfiles: CandidateProfile[] = [];
+  visibleProfiles: CandidateProfile[] = [];
   batchSize = 20;
   currentIndex = 0;
+  hasMoreProfiles = false;
 
   constructor(
-    private xraySearchService: XraySearch
-  ) { }
+    private xraySearchService: XraySearch,
+    private toast: NgToastService
+  ) {}
 
-  // onSubmit() {
-  //   this.loading = true;
+  onSubmit(): void {
+    // Validate min_exp < max_exp
+    const minExp = this.searchForm.get('min_exp')?.value || 0;
+    const maxExp = this.searchForm.get('max_exp')?.value || 0;
+    
+    if (minExp > maxExp) {
+      this.toast.danger('Minimum experience cannot be greater than maximum');
+      return;
+    }
 
-  //   const payload = this.searchForm.value;
-
-  //   this.xraySearchService.xraySearch(payload).subscribe({
-  //     next: (res) => {
-  //       this.responseData = res;
-  //       this.profiles = res?.profiles || [];
-  //       this.loading = false;
-
-  //       console.log(this.responseData);
-  //       console.log("Profiles:", this.profiles);
-  //     },
-  //     error: (err) => {
-  //       console.error("Search Error:", err);
-  //       this.loading = false;
-  //     }
-  //   });
-  // }
-
-
-  onSubmit() {
     this.loading = true;
-
     this.xraySearchService.xraySearch(this.searchForm.value).subscribe({
-      next: (res) => {
+      next: (res: XraySearchResponse) => {
         this.responseData = res;
-        this.allProfiles = res.profiles; 
+        this.allProfiles = res.profiles || [];
         this.visibleProfiles = [];
         this.currentIndex = 0;
-        this.loadMore();  // show first 20
+        this.loadMore();
         this.loading = false;
+        this.toast.success(`Found ${res.total_count} profiles`);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toast.danger(err.message || 'Failed to search profiles');
       }
     });
   }
 
-  loadMore() {
+  /**
+   * Load next batch of profiles
+   */
+  loadMore(): void {
+    if (this.currentIndex >= this.allProfiles.length) {
+      this.hasMoreProfiles = false;
+      this.toast.info('No more profiles to load');
+      return;
+    }
+
     const nextBatch = this.allProfiles.slice(
       this.currentIndex,
       this.currentIndex + this.batchSize
     );
+
+    if (nextBatch.length === 0) {
+      this.hasMoreProfiles = false;
+      return;
+    }
+
     this.visibleProfiles.push(...nextBatch);
     this.currentIndex += this.batchSize;
+    this.hasMoreProfiles = this.currentIndex < this.allProfiles.length;
   }
 
-
+  ngOnDestroy(): void {
+    // Cleanup if needed
+  }
 }

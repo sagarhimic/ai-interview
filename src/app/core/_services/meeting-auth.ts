@@ -1,33 +1,42 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-
-const httpOptions = {
-    headers: new HttpHeaders({
-        //'Content-Type': 'text/plain'
-    }),
-    params: {}
-};
+import { MeetingAuthResponse } from '../models/api-responses';
+import { ErrorHandlerService } from './error-handler';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MeetingAuth {
-
   private base = environment.apiBase;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
-  authentication(data : any): Observable<any> {
-    httpOptions.params = {};
-    return this.http.post(`${this.base}/login/`,data, httpOptions);
+  /**
+   * Authenticate candidate for meeting with meeting ID
+   */
+  authentication(data: FormData | any): Observable<MeetingAuthResponse> {
+    return this.http.post<MeetingAuthResponse>(
+      `${this.base}/login/`,
+      data
+    ).pipe(
+      catchError(err => this.errorHandler.handleError(err))
+    );
   }
 
-  getUser(candidate_id : any): Observable<any> {
-    httpOptions.params = {};
-    return this.http.post(`${this.base}/candidate/{candidate_id}`, httpOptions);
+  /**
+   * Get candidate information
+   */
+  getUser(candidateId: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.base}/candidate/${candidateId}`
+    ).pipe(
+      catchError(err => this.errorHandler.handleError(err))
+    );
   }
-
-  
 }

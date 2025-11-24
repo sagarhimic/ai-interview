@@ -1,27 +1,31 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-
-const httpOptions = {
-    headers: new HttpHeaders({
-        //'Content-Type': 'text/plain'
-    }),
-    params: {}
-};
+import { RecruiterAuthResponse } from '../models/api-responses';
+import { ErrorHandlerService } from './error-handler';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
-
   private base = environment.apiBase;
- 
-  constructor(private http: HttpClient) {}
 
-  authentication(data : any): Observable<any> {
-    httpOptions.params = {};
-    return this.http.post(`${this.base}/recruiter/login/`,data, httpOptions);
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {}
+
+  /**
+   * Authenticate recruiter with employee credentials
+   */
+  authentication(data: FormData | any): Observable<RecruiterAuthResponse> {
+    return this.http.post<RecruiterAuthResponse>(
+      `${this.base}/recruiter/login/`,
+      data
+    ).pipe(
+      catchError(err => this.errorHandler.handleError(err))
+    );
   }
-  
 }

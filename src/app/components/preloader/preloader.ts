@@ -11,8 +11,9 @@ import { Router } from '@angular/router';
 })
 export class Preloader {
 
-  constructor(public preloader: PreloaderService,
-              public router: Router
+  constructor(
+    public preloader: PreloaderService,
+    public router: Router
   ) {}
 
 }

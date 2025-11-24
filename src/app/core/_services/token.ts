@@ -1,27 +1,31 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { StorageService } from './storage';
+import { ROUTES } from '../constants/routes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Token {
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private storage: StorageService
+  ) {}
 
   setUserData(user_data: string): void {
-    localStorage.setItem('user_data', user_data);
+    this.storage.setItem('user_data', user_data);
   }
 
   // ✅ Save token after login
   setToken(access_token: string): void {
-    localStorage.setItem('access_token', access_token);
+    this.storage.setItem('access_token', access_token);
   }
 
   // ✅ Get stored token
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return this.storage.getItem('access_token');
   }
-
 
   // ✅ Check if logged in
   isLoggedIn(): boolean {
@@ -30,15 +34,13 @@ export class Token {
 
   // ✅ Logout user
   logout(): void {
-    localStorage.clear();
-    localStorage.removeItem('access_token');
+    this.storage.clear();
     document.body.classList.remove('recruiter');
-    this.router.navigate(['/']);
+    this.router.navigate([ROUTES.ROOT]);
   }
 
   public getUserData(): any | null {
-    const jsonData = localStorage.getItem('user_data');
-    return jsonData ? JSON.parse(jsonData) : null;
-}
+    return this.storage.getItemAsJSON('user_data');
+  }
   
 }

@@ -10,25 +10,26 @@ import { loginGuard } from './core/guards/login-guard';
 import { meetLoginGuard } from './core/guards/meet-login-guard';
 import { ProfileSearch } from './recruiter/profile-search/profile-search';
 import { RecruiterLayout } from './layouts/recruiter-layout/recruiter-layout';
+import { ROUTES } from './core/constants/routes';
 
 export const routes: Routes = [
 
     // RECRUITER ROUTES
-    { path: '', component: Login, canActivate: [loginGuard] },
+    { path: ROUTES.RECRUITER.LOGIN, component: Login, canActivate: [loginGuard] },
 
     {
         path: '', component: RecruiterLayout, canActivate: [authGuard],
         children: [
-        { path: 'dashboard', component: Dashboard },
-        { path: 'profile-search', component: ProfileSearch },
+        { path: ROUTES.RECRUITER.DASHBOARD.slice(1), component: Dashboard },
+        { path: ROUTES.RECRUITER.PROFILE_SEARCH.slice(1), component: ProfileSearch },
         ]
     },
 
     // MEETING ROUTES
-    { path: 'meeting-login', component: MeetingLogin, canActivate: [meetLoginGuard] },
-    { path: 'interview',component: Interview, canActivate: [meetAuthGuard] },
-    { path: 'avatar',component: AvatarViewer, canActivate: [meetAuthGuard] },
+    { path: ROUTES.MEETING.LOGIN.slice(1), component: MeetingLogin, canActivate: [meetLoginGuard] },
+    { path: ROUTES.MEETING.INTERVIEW.slice(1), component: Interview, canActivate: [meetAuthGuard] },
+    { path: ROUTES.MEETING.AVATAR.slice(1), component: AvatarViewer, canActivate: [meetAuthGuard] },
 
     // ⚠️ CATCH ALL INVALID ROUTES
-    { path: '**', redirectTo: '' }
+    { path: '**', redirectTo: ROUTES.ROOT }
 ];

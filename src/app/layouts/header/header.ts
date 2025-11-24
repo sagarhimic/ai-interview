@@ -4,6 +4,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { Toggle } from '../../core/_services/toggle';
 import { filter } from 'rxjs';
+import { ThemeService } from '../../core/_services/theme-service';
 
 @Component({
   selector: 'app-header',
@@ -24,11 +25,15 @@ export class Header implements OnInit {
   constructor(
     private _token: Token,
     private toggleService: Toggle,
+    public themeService: ThemeService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router
   ) {
         this.toggleService.isSidebarToggled$.subscribe(isSidebarToggled => {
             this.isSidebarToggled = isSidebarToggled;
+        });
+        this.themeService.isToggled$.subscribe(isToggled => {
+            this.isToggled = isToggled;
         });
         // Subscribe to router events to toggle the sidebar on navigation
         this.router.events.pipe(
@@ -64,7 +69,7 @@ export class Header implements OnInit {
 
     // Dark Mode
     toggleTheme() {
-        //this.themeService.toggleTheme();
+        this.themeService.toggleTheme();
     }
 
     // Header Sticky

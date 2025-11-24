@@ -38,24 +38,6 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-body:not(.recruiter-mode){
-    background: #101A25;
-    position: relative;
-
-    &::before{
-        content: '';
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: url(assets/css-img/bg.png) no-repeat;
-        background-size: cover;
-        background-position: center center;
-        opacity: 0.45;
-        z-index: -1;
-    }
-}
 
 a{color: var(--primaryColor);}
 
@@ -66,12 +48,28 @@ a{color: var(--primaryColor);}
 	-webkit-text-fill-color: transparent;}
 
 
-body.recruiter{
-    background: #f4f8f9;
+
+.login-wrapper{
+    position: relative;
+
+    &::before{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color:#101A25;
+        background-size: cover;
+        opacity: 0.45;
+        z-index: 1;
+    }
+
+    .login-header, .form-signin{
+        position: relative;
+        z-index: 2;
+    }
 }
-
-
-
 
 
 
