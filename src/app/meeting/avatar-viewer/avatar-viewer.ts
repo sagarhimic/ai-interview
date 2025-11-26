@@ -83,7 +83,7 @@ export class AvatarViewer implements OnInit, AfterViewInit, OnDestroy {
   private loadAvatar() {
     const loader = new GLTFLoader();
     loader.load(
-      '/glb_avatars/brunette.glb',
+      'glb_avatars/brunette.glb',
       (gltf) => {
         const model = gltf.scene;
         model.scale.set(2.5, 2.5, 2.5);

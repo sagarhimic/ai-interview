@@ -49,9 +49,10 @@ a{color: var(--primaryColor);}
 
 
 
-.login-wrapper{
+.login-wrapper, .img-bg-wrapper{
     position: relative;
-
+    overflow: auto;
+    padding-bottom: 50px;
     &::before{
         content: '';
         position: absolute;
@@ -65,7 +66,7 @@ a{color: var(--primaryColor);}
         z-index: 1;
     }
 
-    .login-header, .form-signin{
+    .login-header, .form-signin, .img-bg-wrapper-inner{
         position: relative;
         z-index: 2;
     }

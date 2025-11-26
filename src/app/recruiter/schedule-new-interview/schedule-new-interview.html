@@ -1,0 +1,118 @@
+<div class="mb-20 d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Schedule New Interview</h5>
+
+    <a class="btn btn-sm btn-outline-primary" routerLink="/schedule-interview/">Back to Interviews</a>
+</div>
+
+
+<form class="row" [formGroup]="ScheduleNewInterviewForm" (ngSubmit)="onSubmit()">
+
+    <div class="col-12">
+        <div class="trezo-card border-radius d-block bg-white border-0 shadow-none h-100">
+            <div class="trezo-card-content">
+                <div class="row g-3">
+
+                    <div class="col-md-12 d-none">
+                        <label for="recruiter_id" class="form-label">Recruiter Id<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="recruiter_id" formControlName="recruiter_id" readonly placeholder="Enter role">
+                    </div>
+
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="profile_name" class="form-label">Candidate Name<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="profile_name" formControlName="profile_name" placeholder="Enter Name">
+                        @if (ScheduleNewInterviewForm.get('profile_name')?.invalid && ScheduleNewInterviewForm.get('profile_name')?.touched) {
+                            <small class="text-danger">Please enter a valid name</small>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="profile_email" class="form-label">Candidate Email<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="profile_email" formControlName="profile_email" placeholder="Enter Email">
+                        @if (ScheduleNewInterviewForm.get('profile_email')?.invalid && ScheduleNewInterviewForm.get('profile_email')?.touched) {
+                            <small class="text-danger">Please enter a valid email</small>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="mobile" class="form-label">Candidate Mobile<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="mobile" formControlName="mobile" placeholder="Enter Mobile">
+                        @if (ScheduleNewInterviewForm.get('mobile')?.invalid && ScheduleNewInterviewForm.get('mobile')?.touched) {
+                            <small class="text-danger">Please enter a valid mobile number</small>
+                        }
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label for="file" class="form-label">Upload Resume<em class="text-danger2">*</em></label>
+                        <input type="file" class="form-control form-control-sm" id="file" (change)="onFileSelect($event)" accept=".pdf,.doc,.docx">
+                        @if (selectedFile) {
+                            <small class="text-success mt-1">Selected: {{ selectedFile.name }} ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
+                        }
+                    </div>
+
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="interview_date" class="form-label">Interview Date & Time<em class="text-danger2">*</em></label>
+                        <input type="datetime-local" class="form-control form-control-sm" id="interview_date" formControlName="interview_date">
+                        @if (ScheduleNewInterviewForm.get('interview_date')?.invalid && ScheduleNewInterviewForm.get('interview_date')?.touched) {
+                            <small class="text-danger">Interview date is required</small>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="interview_duration" class="form-label">Interview Duration (in Min)<em class="text-danger2">*</em></label>
+                        <input type="number" class="form-control form-control-sm" id="interview_duration" formControlName="interview_duration" placeholder="e.g., 30" min="5" max="180">
+                        @if (ScheduleNewInterviewForm.get('interview_duration')?.invalid && ScheduleNewInterviewForm.get('interview_duration')?.touched) {
+                            <small class="text-danger">Duration must be at least 5 minutes</small>
+                        }
+                    </div>
+                    <div class="col-md-4 d-flex flex-column">
+                        <label for="location" class="form-label">Location<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="location" formControlName="location" placeholder="Enter Location">
+                        @if (ScheduleNewInterviewForm.get('location')?.invalid && ScheduleNewInterviewForm.get('location')?.touched) {
+                            <small class="text-danger">Location is required</small>
+                        }
+                    </div>
+
+                    <div class="col-12 d-flex flex-column">
+                        <label for="job_title" class="form-label">Job Title<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="job_title" formControlName="job_title" placeholder="Enter job title">
+                        @if (ScheduleNewInterviewForm.get('job_title')?.invalid && ScheduleNewInterviewForm.get('job_title')?.touched) {
+                            <small class="text-danger">Job title is required</small>
+                        }
+                    </div>
+                    <div class="col-12 d-flex flex-column">
+                        <label class="form-label">Job Description<em class="text-danger2">*</em></label>
+                        <div class="NgxEditor__Wrapper">
+                            @if (editor) {
+                                <ng-container>
+                                    <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                                    <ngx-editor [editor]="editor" formControlName="job_description"></ngx-editor>
+                                </ng-container>
+                            }
+                        </div>
+                        @if (ScheduleNewInterviewForm.get('job_description')?.invalid && ScheduleNewInterviewForm.get('job_description')?.touched) {
+                            <small class="text-danger">Job description is required</small>
+                        }
+                    </div>
+
+                    <div class="col-12 d-flex flex-column">
+                        <label for="required_skills" class="form-label">Required Skills<em class="text-danger2">*</em></label>
+                        <input type="text" class="form-control form-control-sm" id="required_skills" formControlName="required_skills" placeholder="Enter Required Skills comma separated">
+                        @if (ScheduleNewInterviewForm.get('required_skills')?.invalid && ScheduleNewInterviewForm.get('required_skills')?.touched) {
+                            <small class="text-danger">Required skills are required</small>
+                        }
+                    </div>
+
+                    <div class="col-md-12 mt-2 d-flex justify-content-center align-items-center mt-4 mb-1">
+                        <button type="submit" class="btn btn-primary w-25" [disabled]="!isFormValid || loading">
+                            @if (loading) {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Scheduling...
+                            } @else {
+                                Schedule Interview
+                            }
+                        </button>
+                    </div>
+
+                    
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

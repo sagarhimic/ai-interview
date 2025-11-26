@@ -1,12 +1,17 @@
 <!-- ====================== INSTRUCTIONS SECTION ====================== --> 
 @if (!questions.length){
-  <main class="w-100 min-vh-100 d-flex flex-column p-5">
+  <main class="w-100 h-100 d-flex flex-column p-5 img-bg-wrapper" style='background: url(img/bg.png) no-repeat center center fixed;'>
     <!-- Hidden Form Fields -->
-    <div class="d-flex flex-column mb-4 text-center text-white">
+    <div class="d-flex flex-column mb-4 text-center text-white img-bg-wrapper-inner">
+
+      <button class="logout-btn position-absolute" (click)="logout()">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+
       <h1 class="mb-1 h3 fw-bold text-white">Interview Guidelines</h1>
       <small>Please read the instructions carefully before beginning your interview.</small>
     </div>
-    <form [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
+    <form class="img-bg-wrapper-inner" [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
       <div class="hidden">
         <input type="hidden" formControlName="job_title" /> 
         <input type="hidden" formControlName="job_description" /> 
@@ -40,8 +45,8 @@
 
 <!-- ====================== INTERVIEW SECTION ====================== --> 
 @if (questions.length){
-  <main class="w-100 h-100">
-    <div class="row h-100 flex-grow-1 m-0">
+  <main class="w-100 h-100 img-bg-wrapper" style='background: url(img/bg.png) no-repeat center center fixed;'>
+    <div class="row h-100 flex-grow-1 m-0 img-bg-wrapper-inner">
       <!-- LEFT -->
       <div class="col-9 h-100 ps-3">
         <div class="row h-100">

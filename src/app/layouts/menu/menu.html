@@ -1,4 +1,7 @@
-<div class="sidebar-area bg-white transition card-borderd card-with-box-shadow">
+<div class="sidebar-area bg-white transition card-borderd card-with-box-shadow"
+    [ngClass]="{'active': isSidebarToggled}"
+    [class.component-dark-theme]="themeService.isDark()"
+>
     <div class="logo bg-white">
         <a routerLink="/dashboard" class="d-flex align-items-center position-relative">
             <img src="img/logo-icon.png" class="transition position-relative" alt="Amoeba" height="36">
@@ -30,6 +33,14 @@
                             <span class="title lh-1">Profile Search</span>
                         </a>
                     </div>
+
+                    <div class="accordion-item border-radius border-0">
+                        <a routerLink="/schedule-interview" class="sidebar-menu-link w-100 position-relative border-radius fw-medium transition" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                            <i class="material-symbols-outlined">calendar_clock</i>
+                            <span class="title lh-1">Schedule Interviews</span>
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>

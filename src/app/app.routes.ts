@@ -11,6 +11,9 @@ import { meetLoginGuard } from './core/guards/meet-login-guard';
 import { ProfileSearch } from './recruiter/profile-search/profile-search';
 import { RecruiterLayout } from './layouts/recruiter-layout/recruiter-layout';
 import { ROUTES } from './core/constants/routes';
+import { ScheduleInterview } from './recruiter/schedule-interview/schedule-interview';
+import { ScheduleNewInterview } from './recruiter/schedule-new-interview/schedule-new-interview';
+import { MeetingExpired } from './meeting/meeting-expired/meeting-expired';
 
 export const routes: Routes = [
 
@@ -20,8 +23,10 @@ export const routes: Routes = [
     {
         path: '', component: RecruiterLayout, canActivate: [authGuard],
         children: [
-        { path: ROUTES.RECRUITER.DASHBOARD.slice(1), component: Dashboard },
-        { path: ROUTES.RECRUITER.PROFILE_SEARCH.slice(1), component: ProfileSearch },
+            { path: ROUTES.RECRUITER.DASHBOARD.slice(1), component: Dashboard },
+            { path: ROUTES.RECRUITER.PROFILE_SEARCH.slice(1), component: ProfileSearch },
+            { path: ROUTES.RECRUITER.SCHEDULE_INTERVIEW.slice(1), component: ScheduleInterview },
+            { path: ROUTES.RECRUITER.SCHEDULE_NEW_INTERVIEW.slice(1), component: ScheduleNewInterview },
         ]
     },
 
@@ -29,6 +34,10 @@ export const routes: Routes = [
     { path: ROUTES.MEETING.LOGIN.slice(1), component: MeetingLogin, canActivate: [meetLoginGuard] },
     { path: ROUTES.MEETING.INTERVIEW.slice(1), component: Interview, canActivate: [meetAuthGuard] },
     { path: ROUTES.MEETING.AVATAR.slice(1), component: AvatarViewer, canActivate: [meetAuthGuard] },
+
+
+    { path: ROUTES.MEETING.EXPIRED.slice(1), component: MeetingExpired },
+
 
     // ⚠️ CATCH ALL INVALID ROUTES
     { path: '**', redirectTo: ROUTES.ROOT }

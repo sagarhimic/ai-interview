@@ -12,10 +12,13 @@ export const ROUTES = {
     LOGIN: '',
     DASHBOARD: '/dashboard',
     PROFILE_SEARCH: '/profile-search',
+    SCHEDULE_INTERVIEW: '/schedule-interview',
+    SCHEDULE_NEW_INTERVIEW: '/schedule-interview/new',
   },
 
   // Meeting Routes
   MEETING: {
+    EXPIRED: '/meeting-expired',
     LOGIN: '/meeting-login',
     INTERVIEW: '/interview',
     AVATAR: '/avatar',

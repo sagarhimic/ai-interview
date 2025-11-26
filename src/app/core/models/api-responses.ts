@@ -27,6 +27,15 @@ export interface MeetingAuthResponse {
   };
 }
 
+// ==================== SCHEDULE INTERVIEW ====================
+export interface ScheduleInterviewResponse {
+  success: boolean;
+  message: string;
+  interview_id: string;
+  candidate_id: string;
+  meeting_link?: string;
+}
+
 // ==================== INTERVIEW QUESTIONS ====================
 export interface InterviewQuestion {
   id: string;

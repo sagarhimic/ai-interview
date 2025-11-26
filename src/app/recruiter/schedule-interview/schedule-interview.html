@@ -1,0 +1,103 @@
+<div class="mb-20 d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Schedule Interview</h5>
+
+    <a class="btn btn-sm btn-outline-primary" routerLink="/schedule-interview/new">Schedule New Interview</a>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="bt-recent-leads-card trezo-card mb-25 border-radius d-block bg-white border-0 shadow-none">
+            <div class="trezo-card-content">
+                <div class="table-style-two">
+                    <div class="basic-table table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="fw-medium">Profile Name</th>
+                                    <th scope="col" class="fw-medium">Job Title</th>
+                                    <th scope="col" class="fw-medium">Interview Date</th>
+                                    <th scope="col" class="fw-medium">Interview Location</th>
+                                    <th scope="col" class="fw-medium">Interview Duration</th>
+                                    <th scope="col" class="fw-medium">Status</th>
+                                    <th scope="col" class="fw-medium">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (records && records.length > 0) {
+                                    @for (record of records; track $index) {
+                                        <tr>
+                                            <td>
+                                                <div class="customer-info d-flex align-items-center">
+                                                    <div class="img">
+                                                        <img alt="user-image" class="rounded-circle" src="img/avatar-3.png" />
+                                                    </div>
+                                                    <span class="d-block text-black fw-medium">
+                                                        <h6 class="mb-0">{{ record.profile_name }}</h6>
+                                                        <small>Exp: {{ record.profile_exp }}</small>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>{{ record.job_title }}</td>
+                                            <!-- <td>{{ record.profile_skills }}</td> -->
+                                            <!-- <td>{{ record.required_skills }}</td> -->
+                                            <td>{{ record.interview_date }}</td>
+                                            <td>{{ record.interview_location }}</td>
+                                            <td>{{ record.interview_duration }} mins</td>
+                                            <!-- <td>{{ record.job_description }}</td> -->
+                                            <td>
+                                                @if (record.login_status === "0") {
+                                                <span class="trezo-badge">
+                                                    {{ record.status_name }}
+                                                </span>
+                                                } @else if (record.login_status === "1") {
+                                                <span class="trezo-badge cancelled">
+                                                    {{ record.status_name }}
+                                                    </span>
+                                                } @else if (record.login_status === "2") {
+                                                <span class="trezo-badge pending">
+                                                    {{ record.status_name }}
+                                                    </span>
+                                                } @else if (record.login_status === "3") {
+                                                <span class="trezo-badge rejected">
+                                                    {{ record.status_name }}
+                                                    </span>
+                                                } @else if (record.login_status === "4") {
+                                                <span class="trezo-badge finished">
+                                                    {{ record.status_name }}
+                                                    </span>
+                                                }
+
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons d-flex align-items-center">
+                                                    <button type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Details" class="p-0 bg-transparent d-inline-block lh-1 border-0">
+                                                        <i class="material-symbols-outlined"> visibility </i>
+                                                    </button>
+                                                    @if (record.login_status === "0" || record.login_status === "1" || record.login_status === "2") {
+                                                        <button type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Reschedule" class="p-0 bg-transparent d-inline-block lh-1 border-0">
+                                                            <i class="material-symbols-outlined"> history </i>
+                                                        </button>
+                                                    }
+                                                    <!-- <button type="button" class="p-0 bg-transparent d-inline-block lh-1 border-0">
+                                                        <i class="material-symbols-outlined"> edit </i>
+                                                    </button> -->
+                                                    <!-- <button type="button" class="p-0 bg-transparent d-inline-block lh-1 border-0">
+                                                        <i class="material-symbols-outlined"> delete </i>
+                                                    </button> -->
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                } @else {
+                                    <tr>
+                                        <td colspan="8" class="text-center">No interview schedules found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
