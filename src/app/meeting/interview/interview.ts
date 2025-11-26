@@ -50,6 +50,7 @@ export class Interview implements OnInit, OnDestroy {
 
   cameraAllowed = false;
   micAllowed = false;
+  isQuestionBeingAsked: boolean = false;
 
   // recognition helpers
   private silenceTimer: any = null;
@@ -291,25 +292,41 @@ startFrameAnalysis() {
           // }
 
           /** 🔁 Handle statuses */
-          if (this.status === 'paused') {
-            this.stopCamera();
-            //alert('Interview paused: ' + (response.reason || 'Multiple faces detected.'));
-            this.proxyDetectedModal();
-            this.stopListening();
-            this.stopRecording();
-            this.playTTS('Critical! Proxy Detected!.');
-          } else if (this.status === 'idle') {
-            this.playTTS('Are you still there? Please continue speaking.');
-          } else if (this.status === 'idle_for_submission') {
-            console.log('🤖 User idle for long time, auto submitting current answer...');
-            // Only auto-submit if not already recording speech
-            if (!this.isListening) {
-              this.playTTS('You seem idle. Moving to the next question.');
-              this.autoSubmitAnswer();
-            } else {
-              console.log('🎤 Still listening, not submitting yet.');
-            }
+          /** 🔁 Handle statuses (MODIFIED FOR CORRECT IDLE LOGIC) */
+
+        // 1️⃣ Proxy Detected — ALWAYS handle immediately
+        if (this.status === 'paused') {
+          this.stopCamera();
+          this.proxyDetectedModal();
+          this.stopListening();
+          this.stopRecording();
+          this.playTTS('Critical! Proxy Detected!');
+          return;
+        }
+
+        // 2️⃣ DO NOT check idle while interviewer (TTS) is talking
+        if (this.isTTSPlaying || this.isQuestionBeingAsked) {
+          console.log('⏸️ Idle check skipped — interviewer speaking.');
+          return; // exit — do not process idle conditions
+        }
+
+        // 3️⃣ Candidate answering → now idle can be triggered
+        if (this.status === 'idle') {
+          this.playTTS('Are you still there? Please continue speaking.');
+        }
+
+        // 4️⃣ Idle for submission → submit only when not listening
+        else if (this.status === 'idle_for_submission') {
+          console.log('🤖 User idle for long time, auto submitting current answer...');
+          
+          if (!this.isListening) {
+            this.playTTS('You seem idle. Moving to the next question.');
+            this.autoSubmitAnswer();
+          } else {
+            console.log('🎤 Still listening, not submitting yet.');
           }
+        }
+
         },
         error: (err) => {
           console.error('Frame analysis failed', err);
@@ -495,7 +512,10 @@ playTTS(text: string) {
     // };
 
     utterance.onstart = () => {
-      console.log('🔊 Speaking:', text);
+      
+      console.log('🔊 Interviewer asking question…');
+      this.isTTSPlaying = true;
+      this.isQuestionBeingAsked = true;   // <-- IMPORTANT
       if (this.isListening) this.stopListening();
  
       // tell avatar to animate thinking -> speaking
@@ -509,6 +529,8 @@ playTTS(text: string) {
  
     utterance.onend = () => {
       console.log('✅ Done speaking');
+      this.isTTSPlaying = false;
+      this.isQuestionBeingAsked = false;  // <-- INTERVIEWER DONE
       this.displayedQuestion = text; // ensure full question visible
       if (this.avatar) {
         try {
