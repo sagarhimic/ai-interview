@@ -12,15 +12,13 @@
       <!-- Permission Status Indicators -->
       <div class="ms-4 d-flex align-items-center justify-content-center gap-3">
         @if (!checkingPermissions && (cameraPermission === 'denied' && micPermission === 'denied')) {
-          <div class="alert alert-danger blur p-3 rounded-3 mb-3" role="alert">
-            <strong>Browser Security Restriction</strong>
-            <br>
+          <div class="alert alert-bg-light text-body text-center p-2 m-0" role="alert">
+            <h6 class="mb-1">Browser Security Restriction</h6>
             <small>Camera and microphone require HTTPS or localhost. Please ensure you're accessing this page via a secure connection.</small>
           </div>
         }
         
-        
-        <div class="permission-indicator p-2 rounded-3 d-flex align-items-center justify-content-center gap-3">
+        <div class="permission-indicator p-2 rounded-3 d-flex align-items-center justify-content-center gap-3 flex-shrink-0">
           <!-- CAMERA PERMISSION -->
           <div class="cam-indicator d-flex align-items-center gap-2 flex-shrink-0">
             <span class="material-symbols-outlined bg-white rounded-circle d-flex align-items-center justify-content-center" [style.color]="cameraPermission === 'granted' ? '#4CAF50' : cameraPermission === 'denied' ? '#f44336' : '#ff9100'">
@@ -32,11 +30,11 @@
               @if (checkingPermissions) {
                 <small class="text-xs text-uppercase fw-semibold">Checking...</small>
               } @else if (cameraPermission === 'granted') {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #4CAF50;">Allowed</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-success" style="color: #4CAF50;">Allowed</small>
               } @else if (cameraPermission === 'denied') {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #f44336;">Denied</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-danger" style="color: #f44336;">Denied</small>
               } @else {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #ff9100;">Not granted</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-warning" style="color: #ff9100;">Not granted</small>
               }
             </div>
           </div>
@@ -51,11 +49,11 @@
               @if (checkingPermissions) {
                 <small class="text-xs text-uppercase fw-semibold">Checking...</small>
               } @else if (micPermission === 'granted') {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #4CAF50;">Allowed</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-success" style="color: #4CAF50;">Allowed</small>
               } @else if (micPermission === 'denied') {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #f44336;">Denied</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-danger" style="color: #f44336;">Denied</small>
               } @else {
-                <small class="text-xs text-uppercase fw-semibold" style="color: #ff9100;">Not granted</small>
+                <small class="text-xs text-uppercase fw-semibold badge pill-badge p-1 text-bg-warning" style="color: #ff9100;">Not granted</small>
               }
             </div>
           </div>
@@ -65,13 +63,13 @@
             <div class="vr"></div>
             <button type="button" class="btn btn-warning btn-sm flex-shrink-0" (click)="requestPermissions()" [disabled]="checkingPermissions">
               <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">settings</span>
-              Enable Permissions
+              Enable
             </button>
           }
         </div>
       </div>
 
-      <button class="logout-btn ms-4" (click)="logout()">
+      <button class="logout-btn ms-4 flex-shrink-0" (click)="logout()">
         <span class="material-symbols-outlined">logout</span>
       </button>
     </div>
@@ -102,14 +100,18 @@
             </li>
           }
         </ul>
-        <button type="submit" [disabled]="loadingGenerate || cameraPermission !== 'granted' || micPermission !== 'granted'" class="mt-3 btn btn-primary btn-lg w-25 text-uppercase fw-medium fs-6" [title]="(cameraPermission !== 'granted' || micPermission !== 'granted') ? 'Please enable camera and microphone permissions to start' : ''"> 
+
+        <button type="submit" [disabled]="loadingGenerate" class="mt-3 btn btn-primary btn-lg w-25 text-uppercase fw-medium fs-6" [title]="(cameraPermission !== 'granted' || micPermission !== 'granted') ? 'Please enable camera and microphone permissions to start' : ''"> 
+          {{ loadingGenerate ? 'Generating...' : 'Get Started' }} 
+        </button>
+        <!-- <button type="submit" [disabled]="loadingGenerate || cameraPermission !== 'granted' || micPermission !== 'granted'" class="mt-3 btn btn-primary btn-lg w-25 text-uppercase fw-medium fs-6" [title]="(cameraPermission !== 'granted' || micPermission !== 'granted') ? 'Please enable camera and microphone permissions to start' : ''"> 
           {{ loadingGenerate ? 'Generating...' : 'Get Started' }} 
         </button>
         @if (cameraPermission !== 'granted' || micPermission !== 'granted') {
           <div class="mt-2">
             <small class="text-white opacity-75 text-xs">Please enable camera and microphone permissions to start the interview</small>
           </div>
-        } 
+        }  -->
       </div>
     </form>
   </main>
