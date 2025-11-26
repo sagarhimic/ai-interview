@@ -10,6 +10,56 @@
 
       <h1 class="mb-1 h3 fw-bold text-white">Interview Guidelines</h1>
       <small>Please read the instructions carefully before beginning your interview.</small>
+      
+      <!-- Permission Status Indicators -->
+      <div class="mt-4 d-flex align-items-center justify-content-center gap-3">
+        <div class="permission-indicator blur p-3 rounded-3 d-flex align-items-center gap-2">
+          <span class="material-symbols-outlined" [style.color]="cameraPermission === 'granted' ? '#4CAF50' : cameraPermission === 'denied' ? '#f44336' : '#FFA726'">
+            {{ cameraPermission === 'granted' ? 'videocam' : cameraPermission === 'denied' ? 'videocam_off' : 'videocam' }}
+          </span>
+          <div class="d-flex flex-column align-items-start">
+            <small class="fw-bold">Camera</small>
+            <small class="text-xs">
+              @if (checkingPermissions) {
+                Checking...
+              } @else if (cameraPermission === 'granted') {
+                <span style="color: #4CAF50;">✓ Allowed</span>
+              } @else if (cameraPermission === 'denied') {
+                <span style="color: #f44336;">✗ Denied</span>
+              } @else {
+                <span style="color: #FFA726;">⚠ Not granted</span>
+              }
+            </small>
+          </div>
+        </div>
+        
+        <div class="permission-indicator blur p-3 rounded-3 d-flex align-items-center gap-2">
+          <span class="material-symbols-outlined" [style.color]="micPermission === 'granted' ? '#4CAF50' : micPermission === 'denied' ? '#f44336' : '#FFA726'">
+            {{ micPermission === 'granted' ? 'mic' : micPermission === 'denied' ? 'mic_off' : 'mic' }}
+          </span>
+          <div class="d-flex flex-column align-items-start">
+            <small class="fw-bold">Microphone</small>
+            <small class="text-xs">
+              @if (checkingPermissions) {
+                Checking...
+              } @else if (micPermission === 'granted') {
+                <span style="color: #4CAF50;">✓ Allowed</span>
+              } @else if (micPermission === 'denied') {
+                <span style="color: #f44336;">✗ Denied</span>
+              } @else {
+                <span style="color: #FFA726;">⚠ Not granted</span>
+              }
+            </small>
+          </div>
+        </div>
+        
+        @if (cameraPermission !== 'granted' || micPermission !== 'granted') {
+          <button type="button" class="btn btn-warning btn-sm" (click)="requestPermissions()" [disabled]="checkingPermissions">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">settings</span>
+            Enable Permissions
+          </button>
+        }
+      </div>
     </div>
     <form class="img-bg-wrapper-inner" [formGroup]="setupForm" (ngSubmit)="generateQuestions()">
       <div class="hidden">
@@ -36,7 +86,14 @@
             </li>
           }
         </ul>
-        <button type="submit" [disabled]="loadingGenerate" class="mt-3 btn btn-primary btn-lg w-25 text-uppercase fw-medium fs-6"> {{ loadingGenerate ? 'Generating...' : 'Get Started' }} </button> 
+        <button type="submit" [disabled]="loadingGenerate || cameraPermission !== 'granted' || micPermission !== 'granted'" class="mt-3 btn btn-primary btn-lg w-25 text-uppercase fw-medium fs-6" [title]="(cameraPermission !== 'granted' || micPermission !== 'granted') ? 'Please enable camera and microphone permissions to start' : ''"> 
+          {{ loadingGenerate ? 'Generating...' : 'Get Started' }} 
+        </button>
+        @if (cameraPermission !== 'granted' || micPermission !== 'granted') {
+          <div class="mt-2">
+            <small class="text-warning">⚠ Please enable camera and microphone permissions to start the interview</small>
+          </div>
+        } 
       </div>
     </form>
   </main>
@@ -45,7 +102,7 @@
 
 <!-- ====================== INTERVIEW SECTION ====================== --> 
 @if (questions.length){
-  <main class="w-100 h-100 img-bg-wrapper" style='background: url(img/bg.png) no-repeat center center fixed;'>
+  <main class="w-100 h-100 img-bg-wrapper pb-0" style='background: url(img/bg.png) no-repeat center center fixed;'>
     <div class="row h-100 flex-grow-1 m-0 img-bg-wrapper-inner">
       <!-- LEFT -->
       <div class="col-9 h-100 ps-3">

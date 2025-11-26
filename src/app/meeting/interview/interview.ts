@@ -51,6 +51,11 @@ export class Interview implements OnInit, OnDestroy {
   cameraAllowed = false;
   micAllowed = false;
   isQuestionBeingAsked: boolean = false;
+  
+  // Permission check states
+  cameraPermission: 'checking' | 'granted' | 'denied' | 'prompt' = 'checking';
+  micPermission: 'checking' | 'granted' | 'denied' | 'prompt' = 'checking';
+  checkingPermissions = true;
 
   // recognition helpers
   private silenceTimer: any = null;
@@ -130,6 +135,147 @@ export class Interview implements OnInit, OnDestroy {
       required_skills: [this.user_info?.data?.required_skills, [Validators.required]],
       candidate_skills: [this.user_info?.data?.candidate_skills, [Validators.required]],
     });
+    
+    // Check camera and mic permissions on load
+    this.checkMediaPermissions();
+  }
+
+  // Check camera and microphone permissions
+  async checkMediaPermissions() {
+    this.checkingPermissions = true;
+    
+    try {
+      // First, try to enumerate devices to see what's available
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasCamera = devices.some(device => device.kind === 'videoinput');
+      const hasMic = devices.some(device => device.kind === 'audioinput');
+      
+      console.log('Available devices:', { hasCamera, hasMic, devices });
+      
+      // Try checking via Permissions API (not all browsers support this)
+      if (navigator.permissions) {
+        try {
+          const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+          this.cameraPermission = cameraPermission.state as 'granted' | 'denied' | 'prompt';
+          
+          cameraPermission.onchange = () => {
+            this.ngZone.run(() => {
+              this.cameraPermission = cameraPermission.state as 'granted' | 'denied' | 'prompt';
+            });
+          };
+          
+          const micPermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+          this.micPermission = micPermission.state as 'granted' | 'denied' | 'prompt';
+          
+          micPermission.onchange = () => {
+            this.ngZone.run(() => {
+              this.micPermission = micPermission.state as 'granted' | 'denied' | 'prompt';
+            });
+          };
+          
+          console.log('Permission API states:', { camera: this.cameraPermission, mic: this.micPermission });
+        } catch (e) {
+          console.log('Permissions API not fully supported, using fallback');
+          // If Permissions API fails, try direct access
+          await this.checkPermissionsViaAccess();
+        }
+      } else {
+        console.log('Permissions API not available, using direct access');
+        // Browser doesn't support permissions API, try direct access
+        await this.checkPermissionsViaAccess();
+      }
+    } catch (error) {
+      console.error('Error checking permissions:', error);
+      await this.checkPermissionsViaAccess();
+    } finally {
+      this.checkingPermissions = false;
+    }
+  }
+  
+  // Check permissions by attempting direct media access
+  async checkPermissionsViaAccess() {
+    // Check camera
+    try {
+      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.cameraPermission = 'granted';
+      cameraStream.getTracks().forEach(track => track.stop());
+      console.log('Camera permission: granted');
+    } catch (err: any) {
+      this.cameraPermission = err.name === 'NotAllowedError' ? 'denied' : 'prompt';
+      console.log('Camera permission:', this.cameraPermission, err);
+    }
+    
+    // Check microphone
+    try {
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.micPermission = 'granted';
+      micStream.getTracks().forEach(track => track.stop());
+      console.log('Microphone permission: granted');
+    } catch (err: any) {
+      this.micPermission = err.name === 'NotAllowedError' ? 'denied' : 'prompt';
+      console.log('Microphone permission:', this.micPermission, err);
+    }
+  }
+  
+  // Fallback method to check permissions by attempting access
+  async checkPermissionsFallback() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      this.cameraPermission = 'granted';
+      this.micPermission = 'granted';
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err: any) {
+      if (err.name === 'NotAllowedError') {
+        this.cameraPermission = 'denied';
+        this.micPermission = 'denied';
+      } else {
+        this.cameraPermission = 'prompt';
+        this.micPermission = 'prompt';
+      }
+    }
+  }
+  
+  // Request camera and mic permissions
+  async requestPermissions() {
+    this.checkingPermissions = true;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      this.cameraPermission = 'granted';
+      this.micPermission = 'granted';
+      
+      console.log('Permissions granted:', { camera: this.cameraPermission, mic: this.micPermission });
+      
+      // Stop the test stream
+      stream.getTracks().forEach(track => {
+        console.log('Stopping track:', track.kind, track.label);
+        track.stop();
+      });
+      
+      alert('✓ Camera and microphone permissions granted! You can now start the interview.');
+    } catch (err: any) {
+      console.error('Permission request failed:', err);
+      
+      if (err.name === 'NotAllowedError') {
+        this.cameraPermission = 'denied';
+        this.micPermission = 'denied';
+        alert('✗ Camera and microphone access denied. Please enable them in your browser settings to continue.');
+      } else if (err.name === 'NotFoundError') {
+        alert('✗ No camera or microphone found. Please connect these devices to continue.');
+      } else {
+        alert('✗ Error accessing camera/microphone: ' + err.message);
+      }
+    } finally {
+      this.checkingPermissions = false;
+    }
   }
 
   async startCamera() {
@@ -781,9 +927,28 @@ getCandidateSummary() {
 }
 
   logout() {
-    const modalBackdrop = document.querySelector('.modal-backdrop');
-    modalBackdrop?.remove();
+    // Close all modals before logout
+    this.closeAllModals();
     this._meetToken.logout();
+  }
+
+  private closeAllModals(): void {
+    // Close all open modals
+    const openModals = document.querySelectorAll('.modal.show');
+    openModals.forEach(modal => {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('style', 'display: none');
+    });
+
+    // Remove all modal backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
   }
 
 

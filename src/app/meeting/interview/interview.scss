@@ -238,6 +238,25 @@ textarea {
 header,footer{height: 80px;}
 .ai-user-wrapper{height: calc(100% - 160px);}
 
+// 🎯 Permission Indicators
+.permission-indicator {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 160px;
+  
+  .material-symbols-outlined {
+    font-size: 28px;
+  }
+  
+  .text-xs {
+    font-size: 0.75rem;
+  }
+  
+  small {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
 .qtn-ans-wrapper{width: 80%;bottom:30px;transform: translate(-50%, -0%) !important;
  font-size: 0.938rem;  font-weight: 300;  padding: 8px 15px;z-index: 2;}
 

@@ -23,6 +23,7 @@ export class App implements OnInit {
       .subscribe(event => {
         if (event instanceof NavigationStart) {
           this.preloader.show();
+          this.closeAllModals(); // Close modals on route change
         }
         if (
           event instanceof NavigationEnd ||
@@ -32,5 +33,22 @@ export class App implements OnInit {
           this.preloader.hide();
         }
       });
+  }
+
+  // Close all Bootstrap modals and remove backdrops
+  private closeAllModals(): void {
+    const openModals = document.querySelectorAll('.modal.show');
+    openModals.forEach(modal => {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('style', 'display: none');
+    });
+
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
   }
 }

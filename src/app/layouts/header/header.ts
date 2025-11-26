@@ -121,10 +121,28 @@ export class Header implements OnInit {
 
 
   logout() {
-    const modalBackdrop = document.querySelector('.modal-backdrop');
-    modalBackdrop?.remove();
-    
+    // Close all modals before logout
+    this.closeAllModals();
     this._token.logout();
+  }
+
+  private closeAllModals(): void {
+    // Close all open modals
+    const openModals = document.querySelectorAll('.modal.show');
+    openModals.forEach(modal => {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('style', 'display: none');
+    });
+
+    // Remove all modal backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
   }
 
 }
