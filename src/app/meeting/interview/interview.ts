@@ -145,6 +145,15 @@ export class Interview implements OnInit, OnDestroy {
     this.checkingPermissions = true;
     
     try {
+      // Check if mediaDevices API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('getUserMedia is not supported in this browser');
+        this.cameraPermission = 'denied';
+        this.micPermission = 'denied';
+        this.checkingPermissions = false;
+        return;
+      }
+      
       // First, try to enumerate devices to see what's available
       const devices = await navigator.mediaDevices.enumerateDevices();
       const hasCamera = devices.some(device => device.kind === 'videoinput');
@@ -194,6 +203,14 @@ export class Interview implements OnInit, OnDestroy {
   
   // Check permissions by attempting direct media access
   async checkPermissionsViaAccess() {
+    // Check if mediaDevices API is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('getUserMedia is not supported');
+      this.cameraPermission = 'denied';
+      this.micPermission = 'denied';
+      return;
+    }
+    
     // Check camera
     try {
       const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -240,6 +257,13 @@ export class Interview implements OnInit, OnDestroy {
     this.checkingPermissions = true;
     
     try {
+      // Check if mediaDevices API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('✗ Your browser does not support camera/microphone access. Please use a modern browser (Chrome, Firefox, Edge) and ensure the page is served over HTTPS or localhost.');
+        this.checkingPermissions = false;
+        return;
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
         audio: {
@@ -270,6 +294,8 @@ export class Interview implements OnInit, OnDestroy {
         alert('✗ Camera and microphone access denied. Please enable them in your browser settings to continue.');
       } else if (err.name === 'NotFoundError') {
         alert('✗ No camera or microphone found. Please connect these devices to continue.');
+      } else if (err.name === 'NotSupportedError') {
+        alert('✗ Camera/microphone access is not supported. Please ensure you are using HTTPS or localhost.');
       } else {
         alert('✗ Error accessing camera/microphone: ' + err.message);
       }
@@ -280,6 +306,12 @@ export class Interview implements OnInit, OnDestroy {
 
   async startCamera() {
   try {
+    // Check if mediaDevices API is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Camera/microphone access is not supported. Please use HTTPS or localhost and a modern browser.');
+      return;
+    }
+    
     this.mediaStream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
       audio: {
